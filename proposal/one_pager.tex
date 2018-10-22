@@ -1,0 +1,254 @@
+\documentclass[10pt]{article}
+
+\usepackage[left=1in,right=1in,bottom=1in,top=1in]{geometry}
+% \usepackage{ulem} 
+% \usepackage[normalem]{ulem}
+% \usepackage[lofdepth,lotdepth]{subfig}
+%\usepackage{floatpag}
+\usepackage{relsize}
+
+\usepackage{qtree}
+\usepackage{listings}
+\usepackage{algpseudocode} 
+\usepackage{algorithmicx}
+\renewcommand\RSsmallest{3pt}
+\usepackage{array}
+\usepackage{eurosym}
+\usepackage{mdframed}
+\usepackage{mathrsfs}
+\usepackage{commath}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+\usepackage{pgfplots}
+\usepackage{standalone} % http://tex.stackexchange.com/questions/11583/insert-a-tikz-picture-from-an-external-file
+
+\usepackage{multirow}
+\usepackage{subfloat}
+\usepackage{rotating}
+\usepackage{caption}
+% \usepackage[nolists]{endfloat}
+\usepackage[round]{natbib}         % bibliography style
+
+% \bibliography{../biblio.bib}
+% \bibliography{J:/matoba/kyle/biblio.bib}
+% \renewbibmacro{in:}{}
+% \renewbibmacro{in:}{}
+
+\hypersetup{
+    bookmarks=true,         % show bookmarks bar?
+    unicode=false,          % non-Latin characters in Acrobat’s bookmarks
+    pdffitwindow=false,     % window fit to page when opened
+    pdfstartview={},    % fits the width of the page to the window
+    pdftitle={},    % title
+    pdfauthor={Kyle Matoba},     % author
+    pdfkeywords={} {} {}, % list of keywords
+    pdfnewwindow=true,      % links in new window
+    colorlinks=true,       % false: boxed links; true: olored links
+    linkcolor=black,          % color of internal links
+    citecolor=black,        % color of links to bibliography
+    filecolor=black,      % color of file links
+    urlcolor=black         % color of external links
+}
+
+\newif\ifpaper
+\papertrue % or
+\paperfalse
+
+\theoremstyle{remark}
+
+\newtheorem{definition}{Definition}
+\newtheorem{axiom}{Axiom}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{result}{Result}
+\newtheorem{fact}{Fact}
+\newtheorem{hypothesis}{Hypothesis}
+
+\numberwithin{equation}{section}
+
+\newcommand{\tikzcircle}[2][red,fill=red]{\tikz[baseline=-0.5ex]\draw[#1,radius=#2] (0,0) circle ;}%
+
+% \tikzcircle[black, fill=white]{1.5pt}
+\newcommand{\blackcircle}{\tikzcircle[black, fill=black]{1.5pt}}
+\newcommand{\whitecircle}{\tikzcircle[black, fill=white]{1.5pt}}
+% \newcommand{\blackcircle}{\tikzcircle[black, fill=black]{1.5pt}}
+% \newcommand{\tikzcircle}{\tikz[baseline=-0.5ex]\draw[1.5pt] (0,0) circle ;}%
+
+
+\newcommand{\remarkname}{Remark}
+\newcommand{\lemmaname}{Lemma}
+\newcommand{\factname}{Fact}
+\newcommand{\assumptionname}{Assumption}
+\newcommand{\definitionname}{Definition}
+\newcommand{\hypothesisname}{Hypothesis}
+
+\def\subsubsectionautorefname{Section}  
+\def\subsectionautorefname{Section}  
+\def\sectionautorefname{Section}  
+
+\def\equationautorefname{Equation \hspace{-.15cm}}  
+
+\def\kcom#1{{\sf \textcolor{green}{#1}}}
+% http://www.tug.org/applications/hyperref/manual.html#TBL-23
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\parmin}{par\,min}
+\DeclareMathOperator*{\parmax}{par\,max}
+
+\newcommand{\xxx}{\ \ \ }
+\newcommand{\sxx}{\star\ \ }
+\newcommand{\ssx}{\star\star\ }
+\newcommand{\sss}{\star\star\star}
+
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calE}{\mathcal{E}}
+\newcommand{\calF}{\mathcal{F}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\calI}{\mathcal{I}}
+\newcommand{\calJ}{\mathcal{J}}
+\newcommand{\calK}{\mathcal{K}}
+\newcommand{\calL}{\mathcal{L}}
+\newcommand{\calM}{\mathcal{M}}
+\newcommand{\calN}{\mathcal{N}}
+\newcommand{\calO}{\mathcal{O}}
+\newcommand{\calP}{\mathcal{P}}
+\newcommand{\calQ}{\mathcal{Q}}
+\newcommand{\calR}{\mathcal{R}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calT}{\mathcal{T}}
+\newcommand{\calU}{\mathcal{U}}
+\newcommand{\calV}{\mathcal{V}}
+\newcommand{\calW}{\mathcal{W}}
+\newcommand{\calX}{\mathcal{X}}
+\newcommand{\calY}{\mathcal{Y}}
+\newcommand{\calZ}{\mathcal{Z}}
+
+\newcommand{\textvec}{\textnormal{vec}}
+\newcommand{\1}{\textbf{1}}
+\newcommand{\0}{\textbf{0}}
+\DeclareMathOperator*{\minimize}{minimize}
+\DeclareMathOperator*{\maximize}{maximize}
+
+\newcommand{\interior}{\textnormal{interior}}
+\newcommand{\textsubjectto}{\textnormal{\ subject\ to\ }}
+\newcommand{\texton}{\textnormal{\ on\ }}
+\newcommand{\textif}{\textnormal{\ if\ }}
+\newcommand{\textthus}{\textnormal{\ thus\ }}
+\newcommand{\textonlyif}{\textnormal{\ only\ if\ }}
+\newcommand{\textifandonlyif}{\textnormal{\ if\ and\ only\ if\ }}
+\newcommand{\textat}{\textnormal{\ at\ }}
+\newcommand{\textotherwise}{\textnormal{\ otherwise\ }}
+\newcommand{\textor}{\textnormal{\ or\ }}
+\newcommand{\textfor}{\textnormal{\ for\ }}
+\newcommand{\textforsome}{\textnormal{\ for\ some\ }}
+\newcommand{\textforall}{\textnormal{\ for\ all\ }}
+\newcommand{\textand}{\textnormal{\ and\ }}
+\newcommand{\textalmostsurely}{\textnormal{\ almost\ surely\ }}
+\newcommand{\textalmosteverywhere}{\textnormal{\ almost\ everywhere\ }}
+\newcommand{\textforevery}{\textnormal{\ for\ every\ }}
+\newcommand{\textsuchthat}{\textnormal{\ such\ that\ }}
+\newcommand{\textwhere}{\textnormal{\ where\ }}
+\newcommand{\textsince}{\textnormal{\ since\ }}
+\newcommand{\textthereexistsa}{\textnormal{ \ there\ exists\ a\ }}
+
+\newcommand{\bbA}{\mathbb{A}}
+\newcommand{\bbB}{\mathbb{B}}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\bbD}{\mathbb{D}}
+\newcommand{\bbE}{\mathbb{E}}
+\newcommand{\bbF}{\mathbb{F}}
+\newcommand{\bbG}{\mathbb{G}}
+\newcommand{\bbH}{\mathbb{H}}
+\newcommand{\bbI}{\mathbb{I}}
+\newcommand{\bbJ}{\mathbb{J}}
+\newcommand{\bbK}{\mathbb{K}}
+\newcommand{\bbL}{\mathbb{L}}
+\newcommand{\bbM}{\mathbb{M}}
+\newcommand{\bbN}{\mathbb{N}}
+\newcommand{\bbO}{\mathbb{O}}
+\newcommand{\bbP}{\mathbb{P}}
+\newcommand{\bbQ}{\mathbb{Q}}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\bbS}{\mathbb{S}}
+\newcommand{\bbT}{\mathbb{T}}
+\newcommand{\bbU}{\mathbb{U}}
+\newcommand{\bbV}{\mathbb{V}}
+\newcommand{\bbW}{\mathbb{W}}
+\newcommand{\bbX}{\mathbb{X}}
+\newcommand{\bbY}{\mathbb{Y}}
+\newcommand{\bbZ}{\mathbb{Z}}
+
+\newcommand{\pmbA}{\pmb{A}}
+\newcommand{\pmbB}{\pmb{B}}
+\newcommand{\pmbC}{\pmb{C}}
+\newcommand{\pmbD}{\pmb{D}}
+\newcommand{\pmbE}{\pmb{E}}
+\newcommand{\pmbF}{\pmb{F}}
+\newcommand{\pmbG}{\pmb{G}}
+\newcommand{\pmbH}{\pmb{H}}
+\newcommand{\pmbI}{\pmb{I}}
+\newcommand{\pmbJ}{\pmb{J}}
+\newcommand{\pmbK}{\pmb{K}}
+\newcommand{\pmbL}{\pmb{L}}
+\newcommand{\pmbM}{\pmb{M}}
+\newcommand{\pmbN}{\pmb{N}}
+\newcommand{\pmbO}{\pmb{O}}
+\newcommand{\pmbP}{\pmb{P}}
+\newcommand{\pmbQ}{\pmb{Q}}
+\newcommand{\pmbR}{\pmb{R}}
+\newcommand{\pmbS}{\pmb{S}}
+\newcommand{\pmbT}{\pmb{T}}
+\newcommand{\pmbU}{\pmb{U}}
+\newcommand{\pmbV}{\pmb{V}}
+\newcommand{\pmbW}{\pmb{W}}
+\newcommand{\pmbX}{\pmb{X}}
+\newcommand{\pmbY}{\pmb{Y}}
+\newcommand{\pmbZ}{\pmb{Z}}
+
+\newcommand{\complexity}{\textsc{complexity}}
+\newcommand{\projection}{\textsc{projection}}
+\setlength{\parindent}{1cm}
+
+\begin{document}
+
+\title{COMS W4995 Project Proposal: Automatic Data Augmentation Policy Selection}
+
+\author{
+Jonathan D. Armstrong (\texttt{jda2167})
+\and
+Jesse Galef (\texttt{jbg2160})
+\and
+Kyle Matoba (\texttt{km3227}) 
+}
+
+\date{}
+\maketitle
+
+\citet{Cubuk2018}
+\citet{Recht2018}
+\citet{Devries2017}
+\section{}
+
+\pagebreak
+\begin{spacing}{0.75}
+
+\bibliographystyle{plainnat}  % needs package natbib
+
+\bibliography{../biblio}
+
+\end{spacing}
+\end{document}
+
