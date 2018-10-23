@@ -1,0 +1,96 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[breaklinks=true,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+%\ifcvprfinal\pagestyle{empty}\fi
+\setcounter{page}{4321}
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{COMS W4995 Project Proposal: Automatic Data Augmentation Policy Selection}
+
+\author{Jonathan D. Armstrong\\
+{\tt\small jda2160@columbia.edu}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+\and
+Jesse Galef\\
+{\tt\small jbg2160@columbia.edu}
+\and
+Kyle Matoba\\
+{\tt\small km3227@columbia.edu}
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+% \begin{abstract}
+% \end{abstract}
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+% \url{https://en.wikipedia.org/wiki/CIFAR-10#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}
+
+For this project, we want to expand upon the approach used in the paper ``AutoAugment: Learning Augmentation Policies from Data'', \cite{Cubuk2018}. This recent paper proposes auautomatically selecting data augmentation policies. The authors proved the effectiveness of their approach by combining their algorithm with state of the art image classification models, such as \cite{Yamada2018} and were able to achieve state of the art results on the CIFAR 10 dataset,\footnote{\url{https://en.wikipedia.org/wiki/CIFAR-10\#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}} and several other canonical test problems in image classification.
+
+We will explore different ways to improve automatic data augmentation using the above paper as a starting point. The authors acknowledge that they used one of many possible search algorithms and that it may be possible to use a different approach to improve on their results. Below are our initial ideas for approaches to improving the AutoAugment procedure:
+
+Object invariants are a characteristic of images, not models. We may be able to reduce the search time to identify an optimal policy by using a simple model. Once a set of optimal policies is found for this simple model, the same optimal policy should transfer to a state of the art model (trained on the same base dataset).
+Different image categories do not need to share the same symmetries. Rather than searching for an optimal policy over the entire dataset, we may be able to improve accuracy by searching for an optimal policy for each category (or for groups of categories).
+Add additional image transformations (the paper used only those in ‘Pillow’)
+More?
+The authors use only a simplistic two-parameter characterisation of augmentation (probability of application, and ‘intensity’ when there was such a notion), which can evidently be bettered by a more careful understanding of the relevant transforms.
+A deeper theoretical understanding of the properties of data augmentation interacts with the underlying model (resnet, shake-shake, shake-drop) used to achieve state of the art performance [1].
+
+As we explore different approaches and the project matures, we expect to converge towards one or two main ideas. We will focus on improving CIFAR-10 models but may explore models for different standard datasets if time permits (e.g. CIFAR-100 or SVHN). Specifically, for any given model, we will evaluate algorithm performance by the increase (or decrease) in accuracy that results from using the data augmentation policy selected by our algorithm. Additionally, where feasible, we will compare our accuracy improvements to those reported in the paper. 
+
+As an assessment criterion, 
+
+
+\cite{Recht2018}
+\cite{Devries2017}
+
+
+% \begin{table}
+% \begin{center}
+% \begin{tabular}{|l|c|}
+% \hline
+% Method & Frobnability \\
+% \hline\hline
+% Theirs & Frumpy \\
+% Yours & Frobbly \\
+% Ours & Makes one's heart Frob\\
+% \hline
+% \end{tabular}
+% \end{center}
+% \caption{Results.   Ours is better.}
+% \end{table}
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{biblio}
+}
+
+\end{document}
