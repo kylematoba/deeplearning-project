@@ -51,26 +51,28 @@ Kyle Matoba\\
 
 %%%%%%%%% BODY TEXT
 \section{Introduction}
-% \url{https://en.wikipedia.org/wiki/CIFAR-10#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}
 
-For this project, we want to expand upon the approach used in the paper ``AutoAugment: Learning Augmentation Policies from Data'', \cite{Cubuk2018}. This recent paper proposes auautomatically selecting data augmentation policies. The authors proved the effectiveness of their approach by combining their algorithm with state of the art image classification models, such as \cite{Yamada2018} and were able to achieve state of the art results on the CIFAR 10 dataset,\footnote{\url{https://en.wikipedia.org/wiki/CIFAR-10\#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}} and several other canonical test problems in image classification.
+For this project, we plan to expand upon the approach used in the paper ``AutoAugment: Learning Augmentation Policies from Data'', \cite{Cubuk2018}. This paper proposes automatically selecting data augmentation policies and is seen to be effective by combining the algorithm with state of the art convolutional neural networks (CNNs), such as \cite{Yamada2018} to achieve state of the art results on the CIFAR 10 dataset,\footnote{\url{https://en.wikipedia.org/wiki/CIFAR-10\#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}} and several other canonical test problems in image classification. The background in applying CNNs to classify images has been widely discussed in class and is intuitive enough from first principles, so we will skip any further discussion of the background to save space for the proposed innovations.
 
-We will explore different ways to improve automatic data augmentation using the above paper as a starting point. The authors acknowledge that they used one of many possible search algorithms and that it may be possible to use a different approach to improve on their results. Below are our initial ideas for approaches to improving the AutoAugment procedure:
+We will explore different ways to improve automatic data augmentation using the above paper as a starting point. The authors acknowledge that they used one of many possible search algorithms and that it may be possible to use a different approach to improve on their results. 
 
-Object invariants are a characteristic of images, not models. We may be able to reduce the search time to identify an optimal policy by using a simple model. Once a set of optimal policies is found for this simple model, the same optimal policy should transfer to a state of the art model (trained on the same base dataset).
+Here is where we intend to begin our search for improvements to the AutoAugment procedure:
+
+
+\begin{itemize}
+\item % Object invariants are a characteristic of images, not models.
 Different image categories do not need to share the same symmetries. Rather than searching for an optimal policy over the entire dataset, we may be able to improve accuracy by searching for an optimal policy for each category (or for groups of categories).
-Add additional image transformations (the paper used only those in ‘Pillow’)
-More?
-The authors use only a simplistic two-parameter characterisation of augmentation (probability of application, and ‘intensity’ when there was such a notion), which can evidently be bettered by a more careful understanding of the relevant transforms.
-A deeper theoretical understanding of the properties of data augmentation interacts with the underlying model (resnet, shake-shake, shake-drop) used to achieve state of the art performance [1].
+We may be able to reduce the search time to identify an optimal policy by using a simple model. Once a set of optimal policies is found for this simple model, the same optimal policy should transfer to a state of the art model (trained on the same base dataset).
+\item A better base set of augmentations to consider -- \cite{Cubuk2018} used primarily the image $\mapsto$ image functions in the ‘Pillow’ Python library, along with a few ``promising'' others, such as \cite{Devries2017}. Some transformation were never chosen (across data sets) and intuitively would not be great candidates for increasing the stability of a model, whilst possibly other transformations not considered would be.
+\item A smarter search space: The authors use only a two-parameter characterisation of augmentation (probability of application, and ‘intensity’ when there was such a notion), which can evidently be bettered by a more careful understanding of the relevant transforms.
+\end{itemize}
 
-As we explore different approaches and the project matures, we expect to converge towards one or two main ideas. We will focus on improving CIFAR-10 models but may explore models for different standard datasets if time permits (e.g. CIFAR-100 or SVHN). Specifically, for any given model, we will evaluate algorithm performance by the increase (or decrease) in accuracy that results from using the data augmentation policy selected by our algorithm. Additionally, where feasible, we will compare our accuracy improvements to those reported in the paper. 
+As we explore different approaches and the project matures, we expect to converge towards one or two main ideas. We will focus on improving CIFAR-10 models but may explore models for different standard datasets if time permits (e.g. CIFAR-100 or SVHN). We will evaluate algorithm performance by the change in accuracy that results from using the data augmentation policy selected by our algorithm and attempt to compare our accuracy to those reported in the paper. Happily, we have already worked with the CIFAR 10 dataset in the first homework, and we have seen that obtaining and loading the data is easier than trivial. In reading the AutoAugment paper, we learned as well about the recent dataset presented in \cite{Recht2018} (which is quite a cool idea!), and so we plan to use that data as well, truly leaving it until all fitting and validation has been done, right before submission (only using it once).
 
-As an assessment criterion, 
+It is natural to propose accuracy improvment as our assessment criterion, however it is equally natural to expect that five Google Brain engineers achieving what appears to be the best published classification error on CIFAR 10 have not left any low hanging fruit. Thus, we would suggest that the thoroughness and quality of our methodological innovations should be primary, albeit with a component of quantitative accuracy improvement, if we are successful in presenting a credible, substantive improvement.
+% As an assessment criterion, 
 
 
-\cite{Recht2018}
-\cite{Devries2017}
 
 
 % \begin{table}
