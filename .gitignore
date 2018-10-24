@@ -19,4 +19,4 @@
 .idea/*
 
 */.ipynb_checkpoints/*
-
+localenv/*
