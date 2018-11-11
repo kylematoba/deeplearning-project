@@ -20,3 +20,8 @@
 
 */.ipynb_checkpoints/*
 localenv/*
+
+
+milestone/*.sty
+milestone/*.bst
+
