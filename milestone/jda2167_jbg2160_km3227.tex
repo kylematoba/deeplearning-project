@@ -107,11 +107,11 @@ Replicating the findings of a paper one is attempting to improve upon is a natur
 \subsection{Hardware Accelerators: GPUs and TPUs}
 \cite{Cubuk2018} was a product of Google Brain, and while it does not demand hundreds of GPU-years to replicate, it (like most deep learning papers, I am beginning to learn) does entail significant computation. For even the least-demanding model, a complete fit would have taken about two months on my CPU. By changing it to running on the K80 GPU offered by Google Colaboratory got this down to about 27 hours. 
 
-Working on Colaboratory presented numerous challenges (which, sadly, consumed most of my efforts up until now). 
+Working on Colaboratory presented numerous challenges around persisting data across sessions (which, sadly, consumed most of my efforts up until now), basically now all solved. 
 
-Getting the computation time down another order of magnitude would be ideal and basically 100\% sufficient, as it would mean that quick experiments could be done inside of an hour, and the full run could be down overnight. This seems plausible with TPUs, given the relative pricing on the Google Cloud Services site.\footnote{\url{https://cloud.google.com/tpu/docs/pricing}} TPUs are really quite expensive, roughly \$5/hour in Europe, thus in less than a day and a half we would consume our allocated budged, thus I am keen to continue using the TPU available through Colaboratory. 
+Getting the computation time down another order of magnitude would be ideal and basically 100\% sufficient, as it would mean that quick experiments could be done inside of an hour, and the full run could be down overnight. This seems plausible with TPUs, given the relative pricing on the Google Cloud Services site.\footnote{\url{https://cloud.google.com/tpu/docs/pricing}} TPUs are really quite expensive, roughly \$5/hour in Europe, thus in less than a day and a half we would consume our allocated budged, thus I am keen to continue using the TPU available through Colaboratory. As well, it seems that the ``shake-drop'' model giving the (\cite{Yamada2018}) best result in \cite{Cubuk2018} (and thus, as far as we are aware, the best result on CIFAR 10), seems exhaust the memory of the standard GPU image on Colaboratory, something I am hoping can be fixed in a move to TPUs as well. 
 
-Unfortunately, moving from running tensorflow code from GPUs to TPUs is much less straightforward from moving from CPUs to GPUs). I have been refactoring the existing code to use TPUS. 
+Unfortunately, moving from running tensorflow code from GPUs to TPUs is much less straightforward from moving from CPUs to GPUs). I have been refactoring the existing code to use TPUs. 
 
 
 \section{Link to Github}
@@ -121,6 +121,7 @@ Currently the work is spread across a few repos, as well as Google Colab noteboo
 \item \url{https://github.com/kylematoba/deeplearning-project}
 \item \url{https://github.com/kylematoba/models}
 \item \url{https://colab.research.google.com/drive/1qV3vCsjnEcm5a8nRpN40n4qgVKKBzBkd#scrollTo=uiht7wpPPPCP} (also checked into the \texttt{deeplearning-project} repo above)
+\item \url{https://colab.research.google.com/drive/13GpO9tSqLxflZ9Z2B6RkWMVzfcemW2v7}
 \end{itemize}
 
 % Note that we've not made the repo public, but we have permissioned \texttt{id2305@columbia.edu}, \texttt{id2303@columbia.edu}, \texttt{}
