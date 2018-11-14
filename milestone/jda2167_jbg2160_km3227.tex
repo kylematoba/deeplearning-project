@@ -29,11 +29,6 @@
 
 \author{Jonathan D. Armstrong\\
 {\tt\small jda2160@columbia.edu}
-% For a paper whose authors are all at the same institution,
-% omit the following lines up until the closing ``}''.
-% Additional authors and addresses can be added with ``\and'',
-% just like the second author.
-% To save space, use either the email address or home page, not both
 \and
 Jesse Galef\\
 {\tt\small jbg2160@columbia.edu}
@@ -88,7 +83,7 @@ Kyle Matoba\\
 
 	Data augmentation is indispensable in achieving state of the art performance in image classification. This makes  sense, as augmentations can be researched and applied independently of the model architecture, and appear to almost uniformly help. So there's a rough separability -- the best performance will be achieved by the best architecture wedded to the best data augmentation.  One compelling finding to this effect is that \cite{Recht2018} find that out of more than 20 models they entertained, the best-performing model on the CIFAR-10 dataset (\cite{Krizhevsk2009}) was a cutout (\cite{Devries2017}) regularised ``shake-shake'' architecture (\cite{Gastaldi2017}). Cutout is a data augmentation method which appends to the base data set additional occluded images that have had had contiguous regions set to ``zero'' (assuming the data has been normalised around this value). 
 	%For example, in \autoref{fig:cutout}, we show a cutout region in a CIFAR 10 image of an ostrich. 
-	Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (test) and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets. Since cutout is not a transform typically used for data augmentation on CIFAR-10 models, the above results imply that with the addition of cutout, model performance is more robust. Note that for the AutoAugment policy for CIFAR-10 3 out of the 95 sub-policies include cutout.
+	Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (test) and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets. % Since cutout is not a transform typically used for data augmentation on CIFAR-10 models, the above results imply that with the addition of cutout, model performance is more robust. Note that for the AutoAugment policy for CIFAR-10 3 out of the 95 sub-policies include cutout.
 
 	%\begin{figure}[t]
 	%\begin{center}
@@ -137,7 +132,7 @@ Kyle Matoba\\
 	% My results have been slowed somewhat by the necessity of learning to use TensorFlow on an industrial scale, for example I took many hours to pick up TensorBoard. 
 
 \subsection{Replicating \cite{Cubuk2018}}
-	Replicating the findings of a paper one is attempting to improve upon is a natural starting point. We have managed to do parts of this. More importantly, we have grasped the code and begun making modifications necessary to more fully extend it, such as loading the CIFAR10.1 data set, and generalizing the set of augmentations.
+	Replicating the findings of a paper one is attempting to improve upon is a natural starting point. We have done parts of this. More importantly, we have grasped the code and begun making modifications necessary to more fully extend it, such as loading the CIFAR10.1 data set, and generalizing the set of augmentations.
 
 % 	\subsection{}
 % 		\begin{itemize}
@@ -154,10 +149,10 @@ Kyle Matoba\\
 
 		Working on Colaboratory presented numerous challenges around persisting data across sessions. This, sadly, consumed considerable effort, but happily seems to now be mostly resolved. 
 
-		Getting the computation time down another order of magnitude would be ideal and basically 100\% sufficient, as it would mean that quick experiments could be done inside of an hour, and the full run, delivering cutting edge results, could be done overnight. This seems plausible with TPUs, given the relative pricing on the Google Cloud Services site.\footnote{\url{https://cloud.google.com/tpu/docs/pricing}} TPUs are really quite expensive, roughly \$5/hour in Europe, thus in less than a day and a half we would consume our allocated budged, thus I am keen to continue using the TPU available through Colaboratory. As well, it seems that the ``shake-drop'' model giving the (\cite{Yamada2018}) best result in \cite{Cubuk2018} (and thus, as far as we are aware, the best result on CIFAR 10), seems exhaust the memory of the standard GPU image on Colaboratory, something I am hoping can be fixed in a move to TPUs as well. 
+		Getting the computation time down another order of magnitude would be ideal and basically 100\% sufficient, as it would mean that quick experiments could be done inside of an hour, and the full run, delivering cutting edge results, could be done overnight. This seems plausible with TPUs, given the relative pricing on the Google Cloud Services site.\footnote{\url{https://cloud.google.com/tpu/docs/pricing}} TPUs are really quite expensive, roughly \$5/hour in Europe, thus in less than a day and a half we would consume our allocated budged, thus we are keen to continue using the TPU available through Colaboratory. As well, it seems that the ``shake-drop'' model giving the (\cite{Yamada2018}) best result in \cite{Cubuk2018} (and thus, as far as we are aware, the best result on CIFAR 10), seems exhaust the memory of the standard GPU image on Colaboratory, something I am hoping can be fixed in a move to TPUs as well. 
 
-		Unfortunately, moving from running tensorflow code from GPUs to TPUs is much less straightforward from moving from CPUs to GPUs). Extending the existing code to run on GPUs is another area of ongoing work.
-	% subsection end (Hardware Accelerators...)
+		Unfortunately, moving from running tensorflow code from GPUs to TPUs is much less straightforward from moving from CPUs to GPUs. Extending the existing code to run on GPUs is another area of ongoing work.
+% subsection end (Hardware Accelerators...)
 	
 
 \section{Reduced AutoAugment}
@@ -186,7 +181,7 @@ Kyle Matoba\\
 
 	\begin{itemize}
 	\item \url{https://github.com/kylematoba/deeplearning-project}
-	\item \url{https://github.com/kylematoba/models}
+	\item \url{https://github.com/kylematoba/models/tree/master/research/autoaugment}
 	%\item %\url{https://colab.research.google.com/drive/1qV3vCsjnEcm5a8nRpN40n4qgVKKBzBkd#scrollTo=uiht7wpPPPCP} (also checked into the \texttt{deeplearning-project} repo above)
 	%\item \url{https://colab.research.google.com/drive/13GpO9tSqLxflZ9Z2B6RkWMVzfcemW2v7}
 	\end{itemize}
