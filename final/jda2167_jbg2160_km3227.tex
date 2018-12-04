@@ -1,0 +1,190 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[breaklinks=true,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+%\ifcvprfinal\pagestyle{empty}\fi
+\setcounter{page}{1}
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{COMS W4995 Project Milestone: Automatic Data Augmentation Policy Selection}
+
+\author{Jonathan D. Armstrong\\
+{\tt\small jda2160@columbia.edu}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+\and
+Jesse Galef\\
+{\tt\small jbg2160@columbia.edu}
+\and
+Kyle Matoba\\
+{\tt\small km3227@columbia.edu}
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+% \begin{abstract}
+% \end{abstract}
+
+% Evaluation metrics for project milestone (20 points)
+% Introduction: 2 points
+% Related work and references: 2 points
+% Problem formulation, technical depth and innovation: 3 points
+% Methods, technical depth and innovation, architecture and design: 5 points
+% Preliminary results, Github repository, data, code correctness and readability: 8 points
+ 
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+
+	In this project, we are working to expand upon the approach used in ``AutoAugment: Learning Augmentation Policies from Data'', \cite{Cubuk2018}. This paper demonstrates success using reinforcement learning to search the parameter space of augmentation policies and identify high quality policies. When this data augmentation is combined with state of the art convolutional neural networks (CNNs), such as \cite{Yamada2018} it achieves state of the art results on the CIFAR 10 dataset,\footnote{\url{https://en.wikipedia.org/wiki/CIFAR-10\#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}} and several other canonical test problems in image classification. 
+	
+
+\section{Related works}
+
+	Data augmentation is indispensable in achieving state of the art performance in image classification. We have seen the best performance achieved by the best architecture wedded to the best data augmentation policy.  One compelling finding to this effect is that \cite{Recht2018} find that out of more than 20 models they entertained, the best-performing model on the CIFAR-10 dataset (\cite{Krizhevsk2009}) was a cutout (\cite{Devries2017}) regularised ``shake-shake'' architecture (\cite{Gastaldi2017}). Cutout is a data augmentation method which appends to the base data set additional occluded images that have had had contiguous regions set to ``zero'' (assuming the data has been normalised around this value). 
+
+	Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (test) and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets. 
+
+\section{Replicating \cite{Cubuk2018}}
+	Replicating the findings of a paper one is attempting to improve upon is a natural starting point. We have managed to do parts of this. More importantly, we have grasped the code and begun making modifications necessary to more fully extend it, such as loading the CIFAR10.1 data set, and generalizing the set of augmentations.
+
+	\subsection{Hardware Accelerators: GPUs and TPUs}
+		\cite{Cubuk2018} was a product of Google Brain, and while it does not demand hundreds of GPU-years to replicate, it does entail significant computation. For even the least-demanding model, a complete fit would have taken about two months on a relatively modern CPU. Alternately, running on the K80 GPU offered by Google Colaboratory got this time down to about 27 hours. 
+
+		Getting the computation time down another order of magnitude would be ideal, as it would mean that quick experiments could be done inside of an hour, and the full run, delivering cutting edge results, could be done overnight. This seems plausible with TPUs, given the relative pricing on the Google Cloud Services site.\footnote{\url{https://cloud.google.com/tpu/docs/pricing}} TPUs are really quite expensive, roughly \$5/hour in Europe, thus in less than a day and a half we would consume our allocated budged, thus we are keen to continue using the TPU available through Colaboratory. As well, it seems that the ``shake-drop'' model giving the (\cite{Yamada2018}) best result in \cite{Cubuk2018} (and thus, as far as we are aware, the best result on CIFAR 10), seems exhaust the memory of the standard GPU image on Colaboratory, something we are hoping can be fixed in a move to TPUs as well. . 
+
+\section{Preliminary results}
+
+	
+
+	Using the author's source code, we were able to duplicate their results on CIFAR-10 with several of the smaller architectures, such as a 26 layer ``Shake-Shake`` model of dimension 32 (\cite{Gastaldi2017}) and a Wide Residual Network (\cite{Zagoruyko2016}) with depth 28 and widening factor 10. Note that the authors hard coded the AutoAugment policy into their source code and did not include the code used to generate any of their policies; in other words, the source code is sufficient to validate their results but not to generate new data augmentation policies. In order to proceed, we divided focus into two different approaches: Reduced AutoAugment (from scratch) and a naive analysis approach. To facilitate comparison of results between the two different approaches, we use the same child model \footnote{\url{https://github.com/keras-team/keras/blob/master/examples/cifar10_cnn.py}} and the same transforms coded by the AutoAugment authors.
+	
+	\subsection{Reduced AutoAugment}
+		Each policy of data augmentation requires selecting 10 operations, each with one of 16 transformations, 11 discrete probabilities of application, and 10 magnitudes.  The resulting action space has approximately $2.9 \times 10^{31}$ possible actions, making a policy-gradient reinforcement learning approach preferable.One challenge in vanilla policy gradient methods is finding a way to update weights without moving too far from the current policy. Several surrogate loss functions have been designed to encourage or enforce smaller steps, including Trust Region Policy Optimization (TRPO) and now Proximal Policy Optimization (PPO). AutoAugment uses a variant called PPO-Clip, developed by OpenAI \cite{Schulman2017}. PPO-Clip implements a surrogate loss function that includes a clipped term for how much more or less likely the sampled action trajectory would be under the new policy. The AutoAugment controller model samples and scores a batch of policies before using stochastic gradient descent to optimize for this loss function.
+		
+		\begin{figure}[h]		
+			\begin{center}
+		   		\includegraphics[width=0.5\textwidth]{ReducedAutoAugment.png}
+			\end{center}
+		   	\caption{Accuracy vs. Log-Likelihood}
+		   	\label{fig:RAA}
+		\end{figure}
+		
+		We implemented a controller model that uses PPO-Clip reinforcement learning. For each training epoch, it produces a batch of data augmentation policies, trains basic 'child models' with them, then uses their validation accuracy as a reward signal. To verify that the controller model was correctly learning to produce better policies, we trained it for 8 epochs - a relatively small number, but enough to check that the algorithm was correct. We found a correlation of .49 between the log likelihood of producing a policy and the quality of that policy, indicating that the model was improving (see figure~\ref{fig:RAA}).
+		
+	
+	\subsection{Naive Analysis}
+		
+		The results of this analysis strongly depend on the validity of comparing different test accuracies. Additionally, it is desirable to get meaningful results quickly. In order to manage these requirement we used the following approaches
+		
+		\begin{enumerate}
+			\item
+				We removed dependency on the random initialization of weights by starting with a partially trained ``base`` model. Each policy is then trained using a copy of this base.
+				
+			\item 
+				We must be sure each model has been fully trained. We acheive this (and reduced training time) by removing the model's dropout layers so that the validation loss achieves a prominent minimum. We then configure the training to hold the weights corresponding to the best validation accuracy.
+				
+			\item 
+				To further reduce training time, we follow the lead of the AutoAgument authors and trained on a reduced version of the CIFAR-10 dataset consisting of 4000 images randomly selected from the training set.
+		\end{enumerate}
+
+		
+		
+		For the discussion below, we use the following definitions (generalize from the AutoAugment Procedure):
+		\begin{enumerate}
+			\item[] 
+				\textbf{Transform}: a single transform that can be applied to an image. This transform is parameterized by the a level (e.g. magnitude of the transform, in the integer range $0,1 \cdots, 10$), and the probability of applying the transform
+				
+			\item[] 
+				\textbf{Sub-policy}: a sequence of transforms that are applied in series to an image
+			
+			\item[] 
+				\textbf{Policy}: a set of Sub-Policies. For each mini-batch, a subpolicy is randomly chosen (uniformly) and applied.
+		\end{enumerate}
+		
+		With the setup described above, we trained the base model against several different policies and achieved the results summarize in the table below.
+		
+		\begin{table}[h]
+			\begin{tabular}{l|l}
+				\hline
+				Policy  						&Test Accuracy (\%)   \\ \hline
+				Baseline (No Augmentation)  	&49.6 \\
+				Single Transform				&46.6 to 53.1 \\
+				AutoAugment 					&53.3 \\ 
+				AutoAugment Random				&53.1 \\	
+				AutoAugment Subset Random 		&55.1 \\
+				Category Targeted Policies   	&50.0 to 54.7 \\
+				Best Transforms as Subpolicy 	&55.5
+			\end{tabular}
+			\caption{Test accuracies with different policies}
+		\end{table}
+		
+		To establish a baseline, we first completed training with no data augmentation. Then, for each transform used in \textit{AutoAugment}, we created a policy that consisted of just that one transform (probability $0.5$ and level $5$). Many canonical transforms for CIFAR-10 made it to the top of the list including \textit{FlipLR} (mirror) and \textit{Rotate} with test accuracies of 53.1\% and 50.7\% respectively. On par with \textit{Rotate} is also the less common transform \textit{Solarize} with a test accuracy of 50.9\%. The worst performer here was \textit{Blur} with a test accuracy of 46.6\%; considering the low resolution of the images this comes as no surprise. 
+		
+		In addition to testing the \textit{AutoAugment} policy, we developed two additional variants to explore the possibility that the AutoAugment procedure is over-engineered. First, \textit{AutoAugment Random} is identical in structure, but set the transforms, probabilities, and levels randomly. Second, \textit{AutoAugment Subset Random} also uses identical structure but draws from the subset of transforms that individually outperformed the baseline by once percent (\textit{FlipLR}, \textit{TranslateY}, \textit{TranslateX}, \textit{ShearY}, \textit{Solarize}, and \textit{Rotate}). The most significant result here is that we were able to comfortably beat the performance of the \textit{AutoAugment} policy by $1.7\%$ with a randomly generated policy (informed by our analysis results).
+		
+		Analysis of the category-level accuracies demonstrated significant differences between the baseline and individual transforms. For example, \textit{TranslateY} increased accuracy for the ``frog`` category by more than $37\%$. Using the test accuracy differences for each transform, we explored different algorithmic approaches to creating category targeted policies (with varying architecture) and achieved test accuracies from $50.0$ up to $54.7$. The architectures on the lower end of performance combined the best transforms for each category and mixed them into sub-policies; these policies topped out at $50.0\%$ test accuracy and were not able to outperform the best single transform (\textit{FlipLR} at $53.1\%$). The architectures on the high end of performance use one transform for each sub-policy with identity masking for categories where the transform performed poorly. With this approach, we observed that test accuracy increased as we eased the identity masking threshold for each category. Ironically, this approach converged to the \textit{Best Transforms as Subpolicy} policy which no longer differentiates between image categories. This policy was algorithmically generated by selecting the transforms that improved the baseline test accuracy by one percent and then used that transform as a sub-policy. This approach mimicked the \textit{AutoAugment Subset Random} policy in the transforms considered, but used a much simpler policy architecture with fixed levels and probability ($5$ and $0.5$ respectively). This policy obtained the best test accuracy, $55.5\%$. 
+		
+	
+		To further verify the effectiveness of the \textit{Best Transforms as Subpolicy} policy, we retested with the full CIFAR-10 training dataset (with 10\% reserved for validation) and restored the dropout layers to the model. Note that each model was trained from scratch without using a shared partially-trained base model. The following table contains the results of this test.
+		
+		\begin{table}[h]
+			\begin{tabular}{l|l}
+				\hline
+				Policy  						&Test Accuracy (\%)   \\ \hline
+				Baseline (No Augmentation)  	&80.5 \\
+				AutoAugment 					&82.3 \\ 
+				Best Transforms as Subpolicy	&84.1 \\	
+
+			\end{tabular}
+			\caption{Full dataset; test accuracies with different policies}
+		\end{table}
+
+		With \textit{Best Transforms as Subpolicy} at the top again, these results provide evidence that it may be possible to outperform AutoAugment with a much simpler procedure. The natural next step now is to use this augmentation policy to train world-class models and see if we can outperform AutoAugment!
+		
+
+	% subsection end (Hardware Accelerators...)
+	
+\section{Link to Github}
+	%Currently the work is spread across a few repos, as well as Google Colab notebooks. We will work to consolidate things into a single, cleanly-runnable shape as we approach conclusion.
+
+	\begin{itemize}
+	\item \url{https://github.com/kylematoba/deeplearning-project}
+	\item \url{https://github.com/kylematoba/models}
+	%\item %\url{https://colab.research.google.com/drive/1qV3vCsjnEcm5a8nRpN40n4qgVKKBzBkd#scrollTo=uiht7wpPPPCP} (also checked into the \texttt{deeplearning-project} repo above)
+	%\item \url{https://colab.research.google.com/drive/13GpO9tSqLxflZ9Z2B6RkWMVzfcemW2v7}
+	\end{itemize}
+
+% Note that we've not made the repo public, but we have permissioned \texttt{id2305@columbia.edu}, \texttt{id2303@columbia.edu}, \texttt{}
+
+\nocite{Torralba2008}
+{\small
+\bibliographystyle{ieee}
+\bibliography{../biblio}
+}
+
+\end{document}
+
