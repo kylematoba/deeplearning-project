@@ -115,18 +115,30 @@ For part of this paper, we consider a more generalized architecture that support
 
 Note that in interpreting all of the following results (and analysis of the CIFAR data more generally), one should note that 100\% accuracy should seem to not even be achievable -- there are misclassifications in the raw data.\footnote{To see this, load the test data, e.g. with \texttt{\_, (xtest, ytest) = keras.datasets.cifar10.load\_data()}, then examine the 2406th entry, e.g. \texttt{plt.imshow(xtest[2405, :, :, :])} -- pretty evidently a frog, but labeled as a cat!}
 
-\subsection{Reduced AutoAugment}
-Each policy of data augmentation requires selecting 10 operations, each with one of 16 transformations, 11 discrete probabilities of application, and 10 magnitudes.  The resulting action space has approximately $2.9 \times 10^{31}$ possible actions, making a policy-gradient reinforcement learning approach preferable.One challenge in vanilla policy gradient methods is finding a way to update weights without moving too far from the current policy. Several surrogate loss functions have been designed to encourage or enforce smaller steps, including Trust Region Policy Optimization (TRPO) and now Proximal Policy Optimization (PPO). AutoAugment uses a variant called PPO-Clip, developed by OpenAI \cite{Schulman2017}. PPO-Clip implements a surrogate loss function that includes a clipped term for how much more or less likely the sampled action trajectory would be under the new policy. The AutoAugment controller model samples and scores a batch of policies before using stochastic gradient descent to optimize for this loss function.
+\subsection{Class Based Policies}
+
+In the original AutoAugment paper, each policy of data augmentation requires selecting 10 operations, each with one of 16 transformations, 11 discrete probabilities of application, and 10 magnitudes. The resulting action space has approximately $2.9 \times 10^{31}$ possible actions, making a policy-gradient reinforcement learning approach preferable. One challenge in vanilla policy gradient methods is finding a way to update weights without moving too far from the current policy. Several surrogate loss functions have been designed to encourage or enforce smaller steps, including Trust Region Policy Optimization (TRPO) and now Proximal Policy Optimization (PPO). AutoAugment uses a variant called PPO-Clip, developed by OpenAI \cite{Schulman2017}. PPO-Clip implements a surrogate loss function that includes a clipped term for how much more or less likely the sampled action trajectory would be under the new policy.We developed our own controller model which uses PPO-Clip to search through possible augmentation policy space, but with some reductions and additions:
+
+\begin{itemize}
+\item Each subpolicy is limited to a single transform with a random magnitude
+\item The space of image transforms is reduced to those identified as promising in \autoref{sec:policies}.
+\item Each image has different probabilities of using each of subpolicy when it is used in training, based on which imge class it is.Each policy output is a matrix in which each row corresponds to an image class and each column corresponds to a different transform.
+\end{itemize}
+
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.5\textwidth]{ReducedAutoAugment.png}
+\includegraphics[width=0.5\textwidth]{heatmap2.png}
 \end{center}
-\caption{Accuracy vs. Log-Likelihood}
-\label{fig:RAA}
+\caption{Example policy for augmenting each image class differently, indicating the percent chance of selecting each transform for each class}
+\label{fig:heatmap2}
 \end{figure}
 
-We implemented a controller model that uses PPO-Clip reinforcement learning. For each training epoch, it produces a batch of data augmentation policies, trains basic `child models' with them, then uses their validation accuracy as a reward signal. To verify that the controller model was correctly learning to produce better policies, we trained it for 8 epochs - a relatively small number, but enough to check that the algorithm was correct. We found a correlation of .49 between the log likelihood of producing a policy and the quality of that policy, indicating that the model was improving (see figure~\ref{fig:RAA}).
+Each row - representing an image class - contains discrete values across the possible image transforms that were sampled from one of 10 parallel softmax layers, treating the probabilities as a multinomial distribution.
+
+The example policy (\autoref{fig:heatmap2}) indicates that when being used in training, a bird image will have a 40\% chance of being solarized, but only a 10\% chance of being flipped left-right.
+
+Since data augmentation which treats different image classes differently is relatively uncommon, the built-in functionality for the top models which user TPUs were unable to incorporate it. We are in the process of finding a way to apply our custom augmentation, with the backup of using less powerful models which will be slower to train.
 
 \subsection{Na\"{\i}ve Analysis}
 The results of this analysis strongly depend on the validity of comparing different test accuracies. Additionally, it is desirable to get meaningful results quickly since we will be retraining models to completion. In order to manage these requirement we used the following approaches
@@ -149,32 +161,34 @@ AutoAugment 			&53.3 \\
 AutoAugment Random		&53.1 \\	
 AutoAugment Subset Random 	&55.1 \\
 Category Targeted Policies   	&50.0 to 54.7 \\
-Best Transforms as Subpolicy 	&55.5
+Best Transforms as Subpolicy 	&55.5 \\
+\hline
 \end{tabular}
 \caption{Test accuracies with different policies}
 \end{table}
 
 \subsection{Policies}
+\label{sec:policies}
 To establish a \textbf{Baseline} policy, we first completed training with no data augmentation. Then, for each of the 20 transforms defined in \textit{AutoAugment}, we tested a policy built purely from that transform (fixed probability $0.5$ and level $5$); these are labeled collectively as the \textbf{Single Transform} policies. Many canonical transforms for CIFAR-10 made it to the top of the list including \textit{flip\_lr} (mirror) and \textit{rotate} with test accuracies of 53.1\% and 50.7\% respectively. On par with \textit{rotate} is also the less common transform \textit{solarize} with a test accuracy of 50.9\%. The worst performer here was \textit{blur} with a test accuracy of 46.6\%; considering the low resolution of the images this comes as no surprise.
 
-		In addition to testing the \textit{AutoAugment} policy, we developed two additional variants to explore the effectiveness of the AutoAugment procedure. First, \textbf{AutoAugment Random} is identical in structure to the original AutoAugment policy, but the transforms, probabilities, and levels are set randomly. Second, \textbf{AutoAugment Subset Random} also uses identical structure but draws from the subset of transforms that individually outperformed the \textbf{Baseline} policy by once percent (\textit{flip\_lr}, \textit{translate\_y}, \textit{translate\_x}, \textit{shear\_y}, \textit{solarize}, and \textit{rotate}). The most significant result here is that we were able to comfortably beat the performance of the \textbf{AutoAugment} policy by $1.7\%$ with a randomly generated policy informed by the results of our naive analysis.
+In addition to testing the \textit{AutoAugment} policy, we developed two additional variants to explore the effectiveness of the AutoAugment procedure. First, \textbf{AutoAugment Random} is identical in structure to the original AutoAugment policy, but the transforms, probabilities, and levels are set randomly. Second, \textbf{AutoAugment Subset Random} also uses identical structure but draws from the subset of transforms that individually outperformed the \textbf{Baseline} policy by once percent (\textit{flip\_lr}, \textit{translate\_y}, \textit{translate\_x}, \textit{shear\_y}, \textit{solarize}, and \textit{rotate}). The most significant result here is that we were able to comfortably beat the performance of the \textbf{AutoAugment} policy by $1.7\%$ with a randomly generated policy informed by the results of our naive analysis.
 
-		Analysis of the category-level accuracies demonstrated significant differences between \textbf{Baseline} and \textbf{Single Transform} policies. For example, \textit{translate\_y} increased accuracy for the ``frog'' category by more than $37\%$. Using the test accuracy differences for each transform, we explored different algorithmic approaches to creating category targeted policies (with varying architecture) and achieved test accuracies from $50.0$ up to $54.7$. The architectures on the lower end of performance combined the best transforms for each category and mixed them into sub-policies; these policies topped out at $50.0\%$ test accuracy and were not able to outperform the best single transform (\textit{flip\_lr} at $53.1\%$). The architectures on the high end of performance use one transform for each sub-policy with identity masking for categories where the transform performed poorly. With this approach, we observed that test accuracy increased as we eased the identity masking threshold for each category. Ironically, this approach converged to the \textbf{Best Transforms as Subpolicy} policy which no longer differentiates between image categories! This policy was algorithmically generated by selecting the transforms that improved the baseline test accuracy by one percent and then used that transform as a sub-policy. This approach mimicked the \textit{AutoAugment Subset Random} policy in the transforms considered, but used a much simpler policy architecture with fixed levels and probability ($5$ and $0.5$ respectively). This policy obtained the best test accuracy, $55.5\%$.
+Analysis of the category-level accuracies demonstrated significant differences between \textbf{Baseline} and \textbf{Single Transform} policies. For example, \textit{translate\_y} increased accuracy for the ``frog'' category by more than $37\%$. Using the test accuracy differences for each transform, we explored different algorithmic approaches to creating category targeted policies (with varying architecture) and achieved test accuracies from $50.0$ up to $54.7$. The architectures on the lower end of performance combined the best transforms for each category and mixed them into sub-policies; these policies topped out at $50.0\%$ test accuracy and were not able to outperform the best single transform (\textit{flip\_lr} at $53.1\%$). The architectures on the high end of performance use one transform for each sub-policy with identity masking for categories where the transform performed poorly. With this approach, we observed that test accuracy increased as we eased the identity masking threshold for each category. Ironically, this approach converged to the \textbf{Best Transforms as Subpolicy} policy which no longer differentiates between image categories! This policy was algorithmically generated by selecting the transforms that improved the baseline test accuracy by one percent and then used that transform as a sub-policy. This approach mimicked the \textit{AutoAugment Subset Random} policy in the transforms considered, but used a much simpler policy architecture with fixed levels and probability ($5$ and $0.5$ respectively). This policy obtained the best test accuracy, $55.5\%$.
 
 		To further verify the effectiveness of the \textbf{Best Transforms as Subpolicy} policy, we retested with the full CIFAR-10 training dataset (with 10\% reserved for validation) and restored the dropout layers to the model. Note that unlike the previous results, each model was trained from scratch without using a shared partially-trained base model. The following table contains the results of this test.
 
-		\begin{table}[h]
-    		\begin{tabular}{l|l}
-		        \hline
-		        Policy                          &Test Accuracy (\%)   \\ \hline
-		        Baseline (No Augmentation)      &80.5 \\
-		        AutoAugment                     &82.3 \\
-		        Best Transforms as Subpolicy    &84.1 \\
-   			\end{tabular}
-   		 	\caption{Full dataset, model; test accuracies with different policies}
-		\end{table}
+\begin{table}[h]
+\begin{tabular}{l|l}
+\hline
+Policy                          &Test Accuracy (\%)   \\ \hline
+Baseline (No Augmentation)      &80.5 \\
+AutoAugment                     &82.3 \\
+Best Transforms as Subpolicy    &84.1 \\
+\end{tabular}
+\caption{Full dataset, model; test accuracies with different policies}
+\end{table}
 
-		With \textbf{Best Transforms as Subpolicy} at the top again, these results provide evidence that it may be possible to outperform AutoAugment with a much simpler procedure. The success of the \textbf{Best Transforms as Subpolicy} architecture demonstrates the power of composition and its applicability to data augmentation; every transform that individually improves test accuracy is cast as a single-transform sub-policy and combined to create a new policy that outperforms any of its constituent transforms. Additionally note that this approach outperforms the original \textbf{AutoAugment} policy even though the transform parameter space is much less dynamic; probabilities are fixed at $0.5\%$ and the level are fixed at $5\%$.
+With \textbf{Best Transforms as Subpolicy} at the top again, these results provide evidence that it may be possible to outperform AutoAugment with a much simpler procedure. The success of the \textbf{Best Transforms as Subpolicy} architecture demonstrates the power of composition and its applicability to data augmentation; every transform that individually improves test accuracy is cast as a single-transform sub-policy and combined to create a new policy that outperforms any of its constituent transforms. Additionally note that this approach outperforms the original \textbf{AutoAugment} policy even though the transform parameter space is much less dynamic; probabilities are fixed at $0.5\%$ and the level are fixed at $5\%$.
 
 \subsection{Wide ResNet model}
 
@@ -198,7 +212,7 @@ Cutout + Flipping & 96.10 & 91.80
 
 The reported accuracies for CIFAR-10 and CIFAR10.1 with the Wide ResNet policy are $97\%$ and $92\%$ respectively \cite{Recht2018}. This corresponds to a drop of five percent. In contrast our results show a significantly reduced drop in accuracy when evaluated on CIFAR-10.1; $drop_1\%$ for \textbf{AutoAument} and $4.4\%$ for \textbf{Best Transforms as Subpolicy}.
 
-We like to think of these as near state of the art results in a particular format: the best classification performance from an off-the-shelf model that could be run for free by someone with a google account overnight.
+We like to think of these as near state of the art results in a particular format: the best classification performance from an off-the-shelf model that could be run for free by anyone without specialised hardware, overnight. This is a practically important and useful notion of goodness.\footnote{For example, see \url{https://www.technologyreview.com/s/612434/one-of-the-fathers-of-ai-is-worried-about-its-future/}.}
 
 \subsection{Observations}
 
