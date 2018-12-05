@@ -54,7 +54,7 @@ Kyle Matoba\\
 %%%%%%%%% BODY TEXT
 \section{Introduction}
 
-In this project, we are working to expand upon the approach used in ``AutoAugment: Learning Augmentation Policies from Data'', \cite{Cubuk2018}. This paper demonstrates success using reinforcement learning to search the parameter space of augmentation policies and identify high quality policies. When this data augmentation is combined with state of the art convolutional neural networks (CNNs), such as \cite{Yamada2018} it achieves state of the art results on the CIFAR 10 dataset,\footnote{\url{https://en.wikipedia.org/wiki/CIFAR-10\#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}} and several other canonical test problems in image classification.
+In this project, we expanded upon the approach used in ``AutoAugment: Learning Augmentation Policies from Data'', \cite{Cubuk2018}. The essential problem here is to classify images, and the main innovation it builds upon is to augment the actual tagged training set with used to train a deep neural natwork with clever, automated transformations of the data that help to build a more robust and generliasable classifier. This paper demonstrates success using reinforcement learning to search the parameter space of augmentation policies and identify high quality policies. When this data augmentation is combined with state of the art convolutional neural networks (CNNs), such as \cite{Yamada2018} it achieves state of the art results on the CIFAR 10 dataset,\footnote{\url{https://en.wikipedia.org/wiki/CIFAR-10\#Research\_Papers\_Claiming\_State-of-the-Art\_Results\_on\_CIFAR-10}} and several other canonical test problems in image classification.
 
 \section{Related works}
 
@@ -64,7 +64,7 @@ Not only was the cutout regularized model best in test-set accuracy, but it was 
 
 \section{The significant challenges in achieving the state of the art}
 
-\cite{Cubuk2018} presents a fairly dramatic improvement to the state of the art on a canonical benchmark, essentially by fitting a very computationally demanding model many times to assess the criterion in a discrete optimisation problem. That is to say that this paper demands fairly considerable computation, and the authors, working at Google Brain, clearly have it. 
+\cite{Cubuk2018} presents a fairly dramatic improvement to the state of the art on several standard benchmarks in image classification by fitting a very computationally demanding model many times to assess the criterion in a discrete optimisation problem. That is to say that this paper demands fairly considerable computation, and the authors, working at Google Brain, clearly have it. 
 
 Using the author's source code, we were able to duplicate their results on CIFAR-10 with several of the smaller architectures, such as a 26 layer ``Shake-Shake`` model of dimension 32 (\cite{Gastaldi2017}) and a Wide Residual Network (\cite{Zagoruyko2016}) with depth 28 and widening factor 10.
 For the latter, which required the least computation, a complete fit would have taken about two months on a relatively modern CPU. By running the calculation on the Nvidia K80 GPU offered by Google Colaboratory, we were able to bring the fitting time down to about 27 hours.
@@ -72,29 +72,32 @@ For the latter, which required the least computation, a complete fit would have 
 \subsection{Hardware Accelerators: GPUs and TPUs}
 Getting the computation time down another order of magnitude would be ideal, as it would mean that quick experiments could be done inside of an hour, and the full run, delivering cutting edge results, could be done overnight.
 
-This was in fact possible using TPUs, though unfortunately it was not possible to adapt the \cite{Cubuk2018} author's code to use TPUs, as it was written in an archaic flavour of Tensorflow. In fact, there is an overwhelming consensus online that using TPUs directly from Tensorflow is hazardous, and that using Keras' \texttt|tf.contrib.tpu.keras\_to\_tpu\_model| method was the only mostly-certain way to avoid doing something very dumb. Happily, after much searching, we were able to find a cleanly-coded and correct implementation of the Wide Resnet in Keras. Happily as well, once we had a cleanly-running Keras model, it was straightforward to convert to running on a TPU.
+This was in fact possible using TPUs, though unfortunately it was not possible to adapt the \cite{Cubuk2018} author's code to use TPUs, as it was written in an archaic (circa 2016!) flavour of Tensorflow. In fact, there is an overwhelming consensus online that using TPUs directly from Tensorflow is hazardous, and that using Keras' \texttt{tf.contrib.tpu.keras\_to\_tpu\_model} method was the only mostly-certain way to avoid doing something very dumb. Happily, after much searching, we were able to find a cleanly-coded and correct implementation of the Wide Resnet in Keras. Happily as well, once we had a cleanly-running Keras model, it was straightforward to convert to running on a TPU.
 
 \subsection{A significant aside: The model and success}
 We elected to fit a relatively simpler and faster architecture, the Wide Residual Network (\cite{Zagoruyko2016}) -- our experiments showed that this model fit between 10 and 100 times more quickly than the best-performing models, so even on a TPU following best practice and under totally ideal conditions, it would not have been possible to do a fit of these models more than once or twice before the deadline. The author of \cite{Gastaldi2017} further bemoans the considerable computational challenges he faced in achieving his results as an individual without substantial computational resources.
 
-Since empirically, the only thing faster than a TPU would be a cluster of TPUs or a massive cluster of GPUs, we can be confident that it would not have been possible to fit this model short of thousands of dollars of google cloud compute credit, or else some \emph{very} cutting-edge optimisations. In our researsh, most of the serious optimsations are coded in Pytorch (precluding the use of TPUs), and use (wide) resnets anyway. For one very cool flavour of this, see the ranking at \url{https://dawn.cs.stanford.edu/benchmark/#cifar10}) of the \cite{Coleman2017} DAWNBench project.
+Since empirically, the only thing faster than a TPU would be a cluster of TPUs or a massive cluster of GPUs (we did not try the only other credible hardware-level acceleration we are aware of: 16 bit floats on chips having specialised support for them, mostly because we found out about them only recently, and furthermore they seem to not be available via Google Cloud Services, and appear to require a good amount of tuning to get correct in any event), we can be confident that it would not have been possible to fit this model short of thousands of dollars of google cloud compute credit, or else some \emph{very} cutting-edge optimisations. In our researsh, most of the serious optimsations are coded in Pytorch (precluding the use of TPUs), and use (wide) resnets anyway. For one very cool flavour of this, see the ranking at \url{https://dawn.cs.stanford.edu/benchmark/#cifar10}) of the \cite{Coleman2017} DAWNBench project.
 
 Based on the comparison of autoaugmented and more simply augmented models presented in \cite{Cubuk2018}, we think that our results should transfer straightforwardly to architectures that perform better un-augmented. This is because the best results seem to be achieved pretty straightforwardly by stacking the best data augmentation schemes atop the best un-augmented architectures -- a separability essentially making totally state of the art results achievable to anyone with sufficient computational wherewithal to fit them.
 
 % As mentioned, we achieve state of the art results in a particular format: the best classification performance from an off-the-shelf model that could be run for free by someone with a google account overnight.
 
-\subsection{Google Colab and Drive}
-An embarassing quantity of effort went into adapting the Colaboratory platform for non-interactive use -- making it more robust to server-side outages and persisting data and results across sessions. This entailed a fairly deep delve into the programmatic control over Colaboratory and Jupyter Notebooks, as well as the better-documented Google Drive API (besides experiments with Dropbox and others). By the end, we had crafted a fairly sophisticated checkpointing and recovery process for the efficient and effective use of Google Colaboratory backed by Google Drive. 
+\subsection{Google Colaboratory and Drive}
+An embarassing quantity of effort went into adapting the Colaboratory platform for non-interactive use -- making it more robust to server-side outages and persisting data and results across sessions. This entailed a fairly deep delve into the programmatic control over Colaboratory and Jupyter Notebooks, as well as the better-documented Google Drive API (besides experiments with Dropbox and others). By the end, we had crafted a fairly sophisticated checkpointing and recovery process for the efficient and effective use of Google Colaboratory backed by Google Drive.
 
-Whilst this time was essentially wasted in the sense that we learned nothing of academic or conceptual import, it was surely not wasted in a more general and perhaps more important issue: it let us achieve world class results without access to hundreds of petaflops of computation. This concern, that the best results may only in future be achievable to those with the financial resources has featured in a recent Columbia Colloquim by John Henessy and has been a topic of considerable interest at the NeurIPS 2018 Conference. % and its attendant press coverage.\footnote{Cf. \url{https://www.bloomberg.com/news/articles/2018-11-30/visa-issues-cast-shadow-on-canada-s-moment-in-the-ai-spotlight}}
+Whilst this time was essentially wasted in the sense that we learned nothing of academic or conceptual import, it was surely not wasted in a more general and perhaps more important issue: it let us achieve world class results without access to hundreds of petaflops of computation. This concern, that the best results may only in future be achievable to those with the financial resources, is a persistent gripe online (including influential movements such as ``fast.ai''\footnote{\url{https://www.fast.ai/about/}}), has featured in a recent Columbia Colloquim by John Henessy and has been a topic of considerable interest at the NeurIPS 2018 Conference. % and its attendant press coverage.\footnote{Cf. \url{https://www.bloomberg.com/news/articles/2018-11-30/visa-issues-cast-shadow-on-canada-s-moment-in-the-ai-spotlight}}
 
 \section{Results}
 
 As an aside, one should note that 100\% accuracy sould seem to not even be achievable -- there are mistakes even in the CIFAR data there are misclassifications!  \footnote{To see this, load the test data, e.g. with \texttt{\_, (xtest, ytest) = keras.datasets.cifar10.load\_data()}, then examine the 2406th entry, e.g. \texttt{plt.imshow(xtest[2405, :, :, :])} -- pretty evidently a frog, but labelled as a cat!}
 
+\subsection{CIFAR 10.1 Genuine out of sample}
+We already knew that we would achieve a 
+
 \subsection{Observations}
 
-Another interesting phenomenon we noticed (we think!) with the Wide Resnet is the ``compression'' described by the professor in class, following \cite{Shwartz-Ziv2017}. The training and validation error tend to rise rapidly in only a few dozen epochs, but the generalisation error is terrible if one stops as soon as the errors begin flattening out (so bad, in fact, that we thought we had made a mistake). I found the mutual-information-based presentation interesting and subtle, but observing it in practice really made me realise how interesting and counterintuitive the result really is. I think that one of the most useful takeaways from this course is that the ``early stopping $\implies$ regularisation $\implies$ better generalisation error`` chain of implications is sloppy thinking and often incorrect in very relevant situations!
+Another interesting phenomenon we noticed (we think!) with the Wide Resnet is the ``compression'' described by the professor in class, following \cite{Shwartz-Ziv2017}. The training and validation error tend to rise rapidly in only a few dozen epochs, but the generalisation error is terrible if one stops as soon as the errors begin flattening out (so bad, in fact, that we thought we had made a mistake). I found the mutual-information-based presentation interesting and subtle, but observing it in practice really made me realise how interesting and counterintuitive the result really is. I think that one of the most useful takeaways from this course is that the ``early stopping $\implies$ regularisation $\implies$ better generalisation error'' chain of implications is sloppy thinking and often incorrect in very relevant situations!
 
 
 \subsection{Reduced AutoAugment}
@@ -121,7 +124,6 @@ The results of this analysis strongly depend on the validity of comparing differ
 Using this scheme, our initial results appear in the table below.
 
 
-
 With the setup described above, we trained the base model against several different policies and achieved the results summarize in the table below.
 
 		\begin{table}[h]
@@ -138,7 +140,7 @@ With the setup described above, we trained the base model against several differ
 			\end{tabular}
 			\caption{Test accuracies with different policies}
 		\end{table}
-	
+
 \section{Augmentation Policy Architecture}
 We will use the following definitions (generalized from the AutoAugment Procedure):
 
@@ -182,12 +184,13 @@ Note that this approach outperforms the original \textbf{AutoAugment} policy eve
 \section{Link to Github}
 	%Currently the work is spread across a few repos, as well as Google Colab notebooks. We will work to consolidate things into a single, cleanly-runnable shape as we approach conclusion.
 
-	\begin{itemize}
-	\item \url{https://github.com/kylematoba/deeplearning-project}
-	\item \url{https://github.com/kylematoba/models}
-	%\item %\url{https://colab.research.google.com/drive/1qV3vCsjnEcm5a8nRpN40n4qgVKKBzBkd#scrollTo=uiht7wpPPPCP} (also checked into the \texttt{deeplearning-project} repo above)
-	%\item \url{https://colab.research.google.com/drive/13GpO9tSqLxflZ9Z2B6RkWMVzfcemW2v7}
-	\end{itemize}
+The main file actioning the state of the art run is at \url{https://github.com/kylematoba/deeplearning-project/blob/master/keras_wide_res_net_matoba.ipynb}.
+% 	\begin{itemize}
+% 	\item \url{https://github.com/kylematoba/deeplearning-project}
+% 	\item \url{https://github.com/kylematoba/models}
+% 	%\item %\url{https://colab.research.google.com/drive/1qV3vCsjnEcm5a8nRpN40n4qgVKKBzBkd#scrollTo=uiht7wpPPPCP} (also checked into the \texttt{deeplearning-project} repo above)
+% 	%\item \url{https://colab.research.google.com/drive/13GpO9tSqLxflZ9Z2B6RkWMVzfcemW2v7}
+% 	\end{itemize}
 
 % Note that we've not made the repo public, but we have permissioned \texttt{id2305@columbia.edu}, \texttt{id2303@columbia.edu}, \texttt{}
 
