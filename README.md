@@ -7,6 +7,7 @@ All initial results are here:
 ## TPU Training with Wide ResNet
 TPU training setup, currently configured for the best Naive Analysis policy:
 [source code](https://github.com/kylematoba/deeplearning-project/blob/master/code/keras_wide_res_net_with_best_transforms_as_subpolicy.ipynb)
+Note that the checkpoint system does not work with gmail accounts associated with @columbia.edu; a personal account must be used to enable the drive API.
 
 ## Reduced AutoAugment
 Current version with support for category targeted transformations:
