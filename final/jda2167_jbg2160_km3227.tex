@@ -208,6 +208,7 @@ Cutout + Flipping & 96.10 & 91.80
 \caption{WRN model \cite{Zagoruyko2016} test accuracies for CIFAR-10 and CIFAR-10.1}
 \end{table}
 
+% Note that, differently to \cite{Cubuk2018} we take the hyperparameters directly from the paper
 % Note that the reported CIFAR-10 test accuracy for AutoAugment is $97.32\%$. The source of this difference is most likely a result of our transition to a TPU-based training setup. However, when using the same setups that only differ by data augmentation policies, our naive approach was able to perform similarly to the much more complicated AutoAugment procedure.
 
 The reported accuracies for CIFAR-10 and CIFAR10.1 with the Wide ResNet policy are $97\%$ and $92\%$ respectively \cite{Recht2018}. This corresponds to a drop of five percent. In contrast our results show a significantly reduced drop in accuracy when evaluated on CIFAR-10.1; $drop_1\%$ for \textbf{AutoAument} and $4.4\%$ for \textbf{Best Transforms as Subpolicy}.
