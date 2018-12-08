@@ -1,5 +1,4 @@
 \documentclass[final]{beamer}
-
 \usepackage[scale=1.24]{beamerposter} % Use the beamerposter package for laying out the poster
 \usetheme{confposter} % Use the confposter theme supplied with this template
 
@@ -20,6 +19,7 @@
 \newlength{\onecolwid}
 \newlength{\twocolwid}
 \newlength{\threecolwid}
+
 % \setlength{\paperwidth}{91cm} % A0 width: 46.8in
 % \setlength{\paperheight}{61cm} % A0 height: 33.1in
 
@@ -60,27 +60,25 @@
 
 \begin{alertblock}{Objectives}
 Approach or improve upon state of the arts results in image classification on the CIFAR-10 dataset (\cite{Krizhevsky2009}) through better, automatically chosen, data augmentation methods. 
-
 \begin{itemize}
 \item \cite{Cubuk2018}
 \end{itemize}
-
 \end{alertblock}
 
-%----------------------------------------------------------------------------------------
-%	INTRODUCTION
-%----------------------------------------------------------------------------------------
+% INTRODUCTION
 
 \begin{block}{Introduction}
 
 Data augmentation has proven essential for obtaining state of the art performance on image classification. For example, 
+
+\cite{Recht2018}
+
 
 \begin{figure}
 \centering
 \includegraphics[width=0.70\textwidth]{ship.png}
 \caption{An augmented CIFAR 10 picture labelled as a ship}
 \end{figure}
-
 \end{block}
 \end{column} % End of the first column
 
@@ -88,95 +86,47 @@ Data augmentation has proven essential for obtaining state of the art performanc
 \begin{column}{\twocolwid} % Begin a column which is two columns wide (column 2)
 \begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column
 
-\begin{column}{\onecolwid}\vspace{-.6in} % The first column within column 2 (column 2.1)
-
-% MATERIALS
-
+\begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
 \begin{block}{Wide ResNet}
 \cite{Zagoruyko2016}
 \begin{itemize}
 \item Duis porta consequat lorem
 \item Eu facilisis est tempus quis
 \end{itemize}
-
 \end{block}
 
-%----------------------------------------------------------------------------------------
 
-\end{column} % End of column 2.1
+\begin{block}{Hardware Accelerators}
+Our results were computed on Google Colaboratory with a Tensor Processing Unit backend.
+If you have an already compiled \texttt{tf.keras} model then you can convert it to a \texttt{KerasTPUModel} simply:
 
-\begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
+{\small
+\texttt{TPU\_WORKER = 'grpc://' + os.environ['COLAB\_TPU\_ADDR']} \\
+\texttt{tpu\_cluster\_resolver = tf.contrib.cluster\_resolver.TPUClusterResolver(TPU\_WORKER)} \\
+\texttt{strategy = tf.contrib.tpu.TPUDistributionStrategy(tpu\_cluster\_resolver, using\_single\_core=False)} \\
+\texttt{model = tf.contrib.tpu.keras\_to\_tpu\_model(model, strategy=strategy)}
+}
 
-%----------------------------------------------------------------------------------------
-%	METHODS
-%----------------------------------------------------------------------------------------
+We saw a roughly 15 times speed up over GPUs, albeit after a few minutes of compilation. 
 
-\begin{block}{Methods}
-
-Lorem ipsum dolor \textbf{sit amet}, 
-
-\end{block}
-\end{column} % End of column 2.2
-\end{columns} % End of the split of column 2 - any content after this will now take up 2 columns width
-
-%	IMPORTANT RESULT
-
-\begin{alertblock}{Hardware Accelerators}
-
-\end{alertblock} 
-
-%----------------------------------------------------------------------------------------
-
-\begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column again
-\begin{column}{\onecolwid} % The first column within column 2 (column 2.1)
-
-%----------------------------------------------------------------------------------------
-%	MATHEMATICAL SECTION
-%----------------------------------------------------------------------------------------
-
-\begin{block}{Mathematical Section}
-
-Nam quis odio enim, in molestie libero. Vivamus cursus mi at nulla elementum sollicitudin. Nam quis odio enim, in molestie libero. Vivamus cursus mi at nulla elementum sollicitudin.
-  
 \begin{equation}
 E = mc^{2}
 \label{eqn:Einstein}
 \end{equation}
 
-Nam quis odio enim, in molestie libero. Vivamus cursus mi at nulla elementum sollicitudin. Nam quis odio enim, in molestie libero. Vivamus cursus mi at nulla elementum sollicitudin.
-
-\begin{equation}
-\cos^3 \theta =\frac{1}{4}\cos\theta+\frac{3}{4}\cos 3\theta
-\label{eq:refname}
-\end{equation}
-
-Nam quis odio enim, in molestie libero. Vivamus cursus mi at nulla elementum sollicitudin. Nam quis odio enim, in molestie libero. Vivamus cursus mi at nulla elementum sollicitudin.
-
-\begin{equation}
-\kappa =\frac{\xi}{E_{\mathrm{max}}} %\mathbb{ZNR}
-\end{equation}
-
 \end{block}
+\end{column} % End of column 2.2
+\end{columns} % End of the split of column 2 - any content after this will now take up 2 columns width
 
-%----------------------------------------------------------------------------------------
+% IMPORTANT RESULT
+% \begin{alertblock}{Important result} 
+% \end{alertblock} 
 
-\end{column} % End of column 2.1
 
+\begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column again
 \begin{column}{\onecolwid} % The second column within column 2 (column 2.2)
 
-%----------------------------------------------------------------------------------------
-%	RESULTS
-%----------------------------------------------------------------------------------------
-
 \begin{block}{Results}
-
-\begin{figure}
-\includegraphics[width=0.8\linewidth]{placeholder.jpg}
-\caption{Figure caption}
-\end{figure}
-
-Nunc tempus venenatis facilisis. Curabitur suscipit consequat eros non porttitor. Sed a massa dolor, id ornare enim:
-
 \begin{table}
 \vspace{2ex}
 \begin{tabular}{l l l}
@@ -190,23 +140,17 @@ Treatment 3 & 0.0009271 & 0.296 \\
 \end{tabular}
 \caption{Table caption}
 \end{table}
-
 \end{block}
 
-%----------------------------------------------------------------------------------------
-
 \end{column} % End of column 2.2
-
 \end{columns} % End of the split of column 2
-
 \end{column} % End of the second column
 
 \begin{column}{\sepwid}\end{column} % Empty spacer column
-
 \begin{column}{\onecolwid} % The third column
-
 \begin{block}{An interesting finding about CIFAR 10 data}
 
+{\small
 \texttt{import keras} \\
 \texttt{import matplotlib.pyplot as plt} \\
 
@@ -214,6 +158,7 @@ Treatment 3 & 0.0009271 & 0.296 \\
 \texttt{\_, (x, y) = keras.datasets.cifar10.load\_data()} \\
 \texttt{plt.imshow(x[2405, :, :, :])} \\
 \texttt{plt.title(labels[y[2405, 0]])}
+}
 
 \begin{figure}
 \centering
@@ -230,23 +175,7 @@ We have demonstrated that very simple policy searches suffice for obtaining near
 
 \end{block}
 
-% ADDITIONAL INFORMATION
-% 
-% \begin{block}{Additional Information}
-% 
-% Maecenas ultricies feugiat velit non mattis. Fusce tempus arcu id ligula varius dictum. 
-% \begin{itemize}
-% \item Curabitur pellentesque dignissim
-% \end{itemize}
-% 
-% \end{block}
-
 \begin{block}{References}
-
-% \nocite{*} % Insert publications even if they are not cited in the poster
-% \small{\bibliographystyle{unsrt}
-% \bibliography{sample}\vspace{0.75in}}
-
 {\small
 \bibliographystyle{ieee}
 \bibliography{../biblio}
@@ -265,9 +194,9 @@ Many thanks to Professor Drori for his help and encouragement. \\
 
 \begin{alertblock}{Contact Information}
 \begin{itemize}
-\item Jonathan: \href{mailto:jda2160@columbia.edu}{jda2160@columbia.edu}
-\item Jesse: \href{mailto:jbg2160@columbia.edu}{jbg2160@columbia.edu}
-\item Kyle: \href{mailto:km3227@columbia.edu}{km3227@columbia.edu}
+\item Jonathan: \href{mailto:jda2160@columbia.edu}{\texttt{jda2160@columbia.edu}}
+\item Jesse: \href{mailto:jbg2160@columbia.edu}{\texttt{jbg2160@columbia.edu}}
+\item Kyle: \href{mailto:km3227@columbia.edu}{\texttt{km3227@columbia.edu}}
 \end{itemize}
 
 \end{alertblock}

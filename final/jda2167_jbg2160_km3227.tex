@@ -241,6 +241,28 @@ Kyle Matoba\\
 	
     Another interesting phenomenon we noticed (we think!) with the Wide ResNet is the ``compression'' described by the professor in class, following \cite{Shwartz-Ziv2017}. The training and validation error tend to rise rapidly in only a few dozen epochs, but the generalisation error is terrible if one stops as soon as the errors begin flattening out (so bad, in fact, that we thought we had made a mistake). I found the mutual-information-based presentation interesting and subtle, but observing it in practice really made me realise how interesting and counterintuitive the result really is. I think that one of the most useful takeaways from this course is that the ``early stopping $\implies$ regularisation $\implies$ better generalisation error'' chain of implications is sloppy thinking and often incorrect in very relevant situations!
 
+
+\subsection{Unbalanced classes}
+
+The CIFAR 10 data are perfectly balanced, each of the 10 possible responses comprise 10\% of the training and test data. Nonetheless, a natural question to ask around class-specific transforms is how to use the information about the relative frequencies of the outcomes in the training data, test data, and population. Clearly such information needs to be appreciated -- by well understood reasoning % (e.g. recall that because the unconditional probability of cancer is low, and the false positive rate is nonnegligible, even upon obtaining a positive screen for cancer, the posterior probability of actually having cancer remains fairly low), 
+any model, no matter how accurate, can easily be overwhelmed by an inadequate appreciation of prior probabilities. 
+
+One interesting indication of this is seen in the recently-concluded ``Quick, Draw! Doodle Recognition Challenge'', where the winner's write-up\footnote{\url{https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73738\#latest-434766}} states that recognising the balanced structure of the test set was the ``Secret Sauce'' that offered a .7\% accuracy boost, which proved to be the difference between first and roughly 30th place!
+
+The method applied there reflects the problem: the training set is unbalanced, whilst the test set is balanced, so the approach taken there is to force the model to emit predictions in equal probability on average over the test set. It does this by decreasing the probability of the most often emitted class and renormalising interatively until all classes are emitted with equal probability.\footnote{The source code implementing this procedure is here: \url{https://github.com/PavelOstyakov/camera_identification/blob/master/camera/postprocessing.py}}
+
+A more general method would work for arbitrary training and test distributions would be to move the distributions together in a similar manner. Let $p_i, i = 1, \hdots, N$ represent a test-set distribution over predicted labels and $\tilde{p}_i, i = 1, \hdots, N$ represents an estimate of the test set distribution (obviously, in real prediction problems, it is not always possible to know what the population distribution will be).
+
+Let $R: [0, \infty)^N \mapsto \{x \in [0, \infty)^N : \sum_{i=1}^N x_i = 1 \}$ be a renormalisation function that takes an unnormalised distribution that back to a probability distribution. In general, how $R$ works should be dictated by the underlyingmodel, for example, it could act via the coefficients in the last softmax layer. Then the generalisation of the method applied by the winners of the Kaggle competition would be to iterate until convergence the mapping
+
+\begin{align*}
+i^\star &= \textnormal{argmax}_i\ |\tilde{p}_i - p_i| \\
+s^\star &= \textnormal{sign}(\tilde{p}_i - p_i) \\
+p &\leftarrow R(p + \alpha \times s^\star \times \iota_N^{i^\star})
+\end{align*}
+
+Where $\iota^i_N$ is an $N$-dimensional vector that is entirely zero, except in the $i$th entry, which is one. It is fairly easy to intuit that for small $\alpha > 0$, this procedure should reach a steady state eventually, barring numerical problems. 
+
 \section{Discussion}
   Is the success of the AutoAugment procedure largely due to the general robustness of considering a large set of image transforms, many of which are not typically used? Our results at least indicate that an alternative search space may be more beneficial; perhaps exploring policy architectures could be more fruitful than exploring each transforms' parameterization (probability and level). Can a faster algorithm be developed that leverages composition?
 
