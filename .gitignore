@@ -9,6 +9,10 @@
 *.prof
 *.bbl
 *.blg
+*.nav
+*.snm
+*.toc
+
 
 *.pyc
 *.pyx

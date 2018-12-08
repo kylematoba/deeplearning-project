@@ -12,26 +12,25 @@
 % To set effective sepwid, onecolwid and twocolwid values, first choose how many columns you want and how much separation you want between columns
 % In this template, the separation width chosen is 0.024 of the paper width and a 4-column layout
 % onecolwid should therefore be (1-(# of columns+1)*sepwid)/# of columns e.g. (1-(4+1)*0.024)/4 = 0.22
-% Set twocolwid to be (2*onecolwid)+sepwid = 0.464
-% Set threecolwid to be (3*onecolwid)+2*sepwid = 0.708
 
 \newlength{\sepwid}
 \newlength{\onecolwid}
-\newlength{\twocolwid}
-\newlength{\threecolwid}
 
-% \setlength{\paperwidth}{91cm} % A0 width: 46.8in
-% \setlength{\paperheight}{61cm} % A0 height: 33.1in
+% Posters should be 90 x 122 cm in landscape orientation.
+\setlength{\paperheight}{90cm}
+\setlength{\paperwidth}{122cm}
 
-\setlength{\paperwidth}{48in} % A0 width: 46.8in
-\setlength{\paperheight}{36in} % A0 height: 33.1in
+% \setlength{\paperwidth}{48in} % A0 width: 46.8in
+% \setlength{\paperheight}{36in} % A0 height: 33.1in
 
-% Posters should be of size 61 cm x 91 cm in portrait orientation or 90 x 122 cm in landscape orientation.
+% \setlength{\paperwidth}{40in} % A0 width: 46.8in
+% \setlength{\paperheight}{30in} % A0 height: 33.1in
 
-\setlength{\sepwid}{0.024\paperwidth} % Separation width (white space) between columns
+
+
+\setlength{\sepwid}{0.02\paperwidth} % Separation width (white space) between columns
 \setlength{\onecolwid}{0.22\paperwidth} % Width of one column
-\setlength{\twocolwid}{0.464\paperwidth} % Width of two columns
-\setlength{\threecolwid}{0.708\paperwidth} % Width of three columns
+ % \setlength{\onecolwid}{0.32\paperwidth} % Width of one column
 \setlength{\topmargin}{-0.5in} % Reduce the top margin size
 %-----------------------------------------------------------
 
@@ -42,89 +41,72 @@
 \author{Jonathan D. Armstrong, Jesse Galef, and Kyle Matoba} % Author(s)
 \institute{Computer Science Department, Columbia University} % Institution(s)
 
-%----------------------------------------------------------------------------------------
-
 \begin{document}
 
 \addtobeamertemplate{block end}{}{\vspace*{2ex}} % White space under blocks
-\addtobeamertemplate{block alerted end}{}{\vspace*{2ex}} % White space under highlighted (alert) blocks
-
+\addtobeamertemplate{block alerted end}{}{\vspace*{2ex}} % White space under highlighted blocks
 \setlength{\belowcaptionskip}{2ex} % White space under figures
 \setlength\belowdisplayshortskip{2ex} % White space under equations
 
 \begin{frame}[t] % The whole poster is enclosed in one beamer frame
 \begin{columns}[t] % The whole poster consists of three major columns, the second of which is split into two columns twice - the [t] option aligns each column's content to the top
 
-\begin{column}{\sepwid}\end{column} % Empty spacer column
+\begin{column}{\sepwid} \end{column} % Empty spacer column
 \begin{column}{\onecolwid} % The first column
 
 \begin{alertblock}{Objectives}
-Approach or improve upon state of the arts results in image classification on the CIFAR-10 dataset (\cite{Krizhevsky2009}) through better, automatically chosen, data augmentation methods. 
-\begin{itemize}
-\item \cite{Cubuk2018}
-\end{itemize}
+Approach or improve upon state of the arts results in image classification on the CIFAR-10 dataset (\cite{Krizhevsky2009}) through better, automatically chosen, data augmentation methods. Building upon \cite{Cubuk2018}, but with an emphasis on practical accessability to those without supercomputing resources.
 \end{alertblock}
 
 % INTRODUCTION
 
 \begin{block}{Introduction}
 
-Data augmentation has proven essential for obtaining state of the art performance on image classification. For example, 
+%	Data augmentation is indispensable in achieving state of the art performance in image classification. We have seen the best performance achieved by the best architecture wedded to the best data augmentation policy.  One compelling finding to this effect is that \cite{Recht2018} find that out of more than 20 models they entertained, the best-performing model on the CIFAR-10 dataset (\cite{Krizhevsk2009}) was a cutout (\cite{Devries2017}) regularised ``shake-shake'' architecture (\cite{Gastaldi2017}). Cutout is a data augmentation method which appends to the base data set additional occluded images that have had had contiguous regions set to ``zero'' (assuming the data has been normalised around this value). 
+% 
+% 	Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (test) and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets.
 
-\cite{Recht2018}
+Data augmentation, which fits a model on functions of the data meant to resemble (to a human) the same label, but have different inputs, is indispensable for obtaining state of the art performance on image classification. For example, not only does \cite{Recht2018} find that data augmentated models perform considerably much better than un-augmented models, but all of the best-performing models on the CIFAR 10 dataset include data augmentation. Furthermore, the automented models perform better on truly ``out of sample'' models, and have lower drops in accuracy between in-sample and out-of-sample accuracy.
 
+\autoref{fig:cutout_ship} shows an example of an augmented image in the CIFAR-10 dataset: a random box of pixels have been set to black (called ``cutout'', \cite{Devries2017}), it has been randomly rotated, and again had cutout applied. It is still recognisable as a ship, though its $[0, 1]^{32 \times 32 \times 3}$ representation is quite different in most measures.
 
 \begin{figure}
 \centering
 \includegraphics[width=0.70\textwidth]{ship.png}
 \caption{An augmented CIFAR 10 picture labelled as a ship}
+\label{fig:cutout_ship}
 \end{figure}
 \end{block}
-\end{column} % End of the first column
 
-\begin{column}{\sepwid}\end{column} % Empty spacer column
-\begin{column}{\twocolwid} % Begin a column which is two columns wide (column 2)
-\begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column
-
-\begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
 \begin{block}{Wide ResNet}
 \cite{Zagoruyko2016}
-\begin{itemize}
-\item Duis porta consequat lorem
-\item Eu facilisis est tempus quis
-\end{itemize}
-\end{block}
 
+\end{block}
 
 \begin{block}{Hardware Accelerators}
 Our results were computed on Google Colaboratory with a Tensor Processing Unit backend.
-If you have an already compiled \texttt{tf.keras} model then you can convert it to a \texttt{KerasTPUModel} simply:
+If you have an already compiled \texttt{tf.keras} model called \texttt{m} then you can convert it to a \texttt{KerasTPUModel} simply:
 
 {\small
-\texttt{TPU\_WORKER = 'grpc://' + os.environ['COLAB\_TPU\_ADDR']} \\
-\texttt{tpu\_cluster\_resolver = tf.contrib.cluster\_resolver.TPUClusterResolver(TPU\_WORKER)} \\
-\texttt{strategy = tf.contrib.tpu.TPUDistributionStrategy(tpu\_cluster\_resolver, using\_single\_core=False)} \\
-\texttt{model = tf.contrib.tpu.keras\_to\_tpu\_model(model, strategy=strategy)}
+\texttt{w = 'grpc://' + os.environ['COLAB\_TPU\_ADDR']} \\
+\texttt{r = tf.contrib.cluster\_resolver.TPUClusterResolver(w)} \\
+\texttt{s = tf.contrib.tpu.TPUDistributionStrategy(r, False)} \\
+\texttt{m = tf.contrib.tpu.keras\_to\_tpu\_model(m, strategy=s)}
 }
 
-We saw a roughly 15 times speed up over GPUs, albeit after a few minutes of compilation. 
+We saw a roughly 15 times speed up over a K80 GPU (albeit after a few minutes of compilation) on this task. 
 
 \begin{equation}
 E = mc^{2}
 \label{eqn:Einstein}
 \end{equation}
-
 \end{block}
-\end{column} % End of column 2.2
-\end{columns} % End of the split of column 2 - any content after this will now take up 2 columns width
 
-% IMPORTANT RESULT
-% \begin{alertblock}{Important result} 
-% \end{alertblock} 
+\end{column} % End of the first column
 
-
-\begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column again
-\begin{column}{\onecolwid} % The second column within column 2 (column 2.2)
+\begin{column}{\onecolwid} % Begin a column which is two columns wide (column 2)
+% \begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
+% \end{column} % End of column 2.2
 
 \begin{block}{Results}
 \begin{table}
@@ -142,13 +124,7 @@ Treatment 3 & 0.0009271 & 0.296 \\
 \end{table}
 \end{block}
 
-\end{column} % End of column 2.2
-\end{columns} % End of the split of column 2
-\end{column} % End of the second column
-
-\begin{column}{\sepwid}\end{column} % Empty spacer column
-\begin{column}{\onecolwid} % The third column
-\begin{block}{An interesting finding about CIFAR 10 data}
+\begin{block}{Fundamental bound on achievable accuracy?}
 
 {\small
 \texttt{import keras} \\
@@ -165,14 +141,21 @@ Treatment 3 & 0.0009271 & 0.296 \\
 \includegraphics[width=0.70\linewidth]{catfrog.png}
 \end{figure}
 
-Fundamental upper bound on achievable accuracy?
+
 \end{block}
 
-% CONCLUSION
+
+% IMPORTANT RESULT
+% \begin{alertblock}{Important result} 
+% \end{alertblock} 
+
+\end{column} % End of the second column
+
+\begin{column}{\sepwid}\end{column} % Empty spacer column
+\begin{column}{\onecolwid} % The third column
 
 \begin{block}{Conclusion}
-We have demonstrated that very simple policy searches suffice for obtaining nearly optimal performance-enhancing image augmentation. Together with a relatively lightweight Wide ResNet fit upon a free TPU, we are able to present an at-or-near state of the art CIFAR-10 image classifier that is achievable to 
-
+We have demonstrated that very simple policy searches suffice for obtaining nearly optimal performance-enhancing image augmentation. Together with a relatively lightweight Wide ResNet fit upon a free TPU, we are able to present an at-or-near state of the art CIFAR-10 image classifier that can be fit quickly and cheaply, an increasingly important criterion (\cite{Coleman2017}).
 \end{block}
 
 \begin{block}{References}
@@ -198,7 +181,6 @@ Many thanks to Professor Drori for his help and encouragement. \\
 \item Jesse: \href{mailto:jbg2160@columbia.edu}{\texttt{jbg2160@columbia.edu}}
 \item Kyle: \href{mailto:km3227@columbia.edu}{\texttt{km3227@columbia.edu}}
 \end{itemize}
-
 \end{alertblock}
 
 \begin{center}

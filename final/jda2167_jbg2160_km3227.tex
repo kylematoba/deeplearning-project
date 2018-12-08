@@ -116,7 +116,7 @@ Kyle Matoba\\
 
 \section{Results}
 
-  Note that in interpreting all of the following results (and analysis of the CIFAR data more generally), one should note that 100\% accuracy should seem to not even be achievable -- there are misclassifications in the raw data.\footnote{To see this, load the test data, e.g. with \texttt{\_, (xtest, ytest) = keras.datasets.cifar10.load\_data()}, then examine the 2406th entry, e.g. \texttt{plt.imshow(xtest[2405, :, :, :])} -- pretty evidently a frog, but labeled as a cat!}
+  Note that in interpreting all of the following results (and analysis of the CIFAR data more generally), one should note that 100\% accuracy should seem to not even be achievable -- there are misclassifications in the raw data.\footnote{To see this, examine the 2406th entry in the test data, e.g. \texttt{\_, (xtest, ytest) = keras.datasets.cifar10.load\_data(); plt.imshow(xtest[2405, :, :, :])} -- evidently a frog, but labeled as a cat!}
 
 	
 
@@ -183,7 +183,7 @@ Kyle Matoba\\
         Policy  &CIFAR-10 Test  &CIFAR-10.1 Test  \\
                 &Accuracy (\%)  &Accuracy (\%) \\ \hline
     % AutoAugment      				&???	&??? \\
-        AutoAugment\cite{Cubuk2018} & 97.32 & Not reported \\
+        \cite{Cubuk2018} & 97.32 & Not reported \\
         Cutout + Flipping                 & 96.10 & 91.80 \\
         AutoAugment			        & 96.98 & 92.30 \\
         Best Transforms 			&96.80	&92.40 \\
@@ -253,7 +253,7 @@ The method applied there reflects the problem: the training set is unbalanced, w
 
 A more general method would work for arbitrary training and test distributions would be to move the distributions together in a similar manner. Let $p_i, i = 1, \hdots, N$ represent a test-set distribution over predicted labels and $\tilde{p}_i, i = 1, \hdots, N$ represents an estimate of the test set distribution (obviously, in real prediction problems, it is not always possible to know what the population distribution will be).
 
-Let $R: [0, \infty)^N \mapsto \{x \in [0, \infty)^N : \sum_{i=1}^N x_i = 1 \}$ be a renormalisation function that takes an unnormalised distribution that back to a probability distribution. In general, how $R$ works should be dictated by the underlyingmodel, for example, it could act via the coefficients in the last softmax layer. Then the generalisation of the method applied by the winners of the Kaggle competition would be to iterate until convergence the mapping
+Let $R: [0, \infty)^N \mapsto \{x \in [0, \infty)^N : \sum_{i=1}^N x_i = 1 \}$ be a renormalisation function that takes an unnormalised distribution that back to a probability distribution. In general, how $R$ works should be dictated by the underlying model, for example, it could act via the coefficients in the last softmax layer. Then the generalisation of the method applied by the winners of the Kaggle competition would be to iterate until convergence the mapping
 
 \begin{align*}
 i^\star &= \textnormal{argmax}_i\ |\tilde{p}_i - p_i| \\
@@ -271,25 +271,19 @@ Where $\iota^i_N$ is an $N$-dimensional vector that is entirely zero, except in 
   % being presumptuous again 
   Although we were not successful in demonstrating benefits of category-targeted transforms, the generalization should still be considered for other datasets. As is often done in mathematics, one can manufacture a representative example. Consider a dataset with two different image categories that express disjoint invariants; it is probably better to selectively apply transforms than to homogeneously apply the same transforms to all categories. This example is clearly artificial, but it is easy to imagine that as you increase the number and diversity of image categories within a dataset, you decrease the ability to identify transforms that improve the overall accuracy when applied to the entire dataset.
 
-\section{Future work}
-
-  We are just beginning to obtain results, so in further work, we plan to do further experiments with different policy-finding algorithms. Most notably, we need to do a bit more development work to enable the subclass-specific augmentations, which cannot natively be represented in the preferred Keras \texttt{ImageDataGenerator} class.
-
+% \section{Future work}
+% 
+%   We are just beginning to obtain results, so in further work, we plan to do further experiments with different policy-finding algorithms. Most notably, we need to do a bit more development work to enable the subclass-specific augmentations, which cannot natively be represented in the preferred Keras \texttt{ImageDataGenerator} class.
+ 
 \section{Link to Github}
-%Currently the work is spread across a few repos, as well as Google Colab notebooks. We will work to consolidate things into a single, cleanly-runnable shape as we approach conclusion.
 
-  We worked hard to condense the state of the art run into a single file runnable by anyone with a google drive -- this is at: \url{https://github.com/kylematoba/deeplearning-project/blob/master/keras_wide_res_net_matoba.ipynb} (make sure to switch the backend to a TPU).
+  We worked hard to condense the state of the art run into a single file runnable by anyone with a google drive -- this is at: \url{https://github.com/kylematoba/deeplearning-project/blob/master/keras_wide_res_net.ipynb} (make sure to switch the backend to a TPU).
+
+  Early work to reproduce the author's original work is available at \url{https://github.com/kylematoba/models}. 
 
   This report is available at \url{https://github.com/kylematoba/deeplearning-project/blob/master/final/jda2167_jbg2160_km3227.tex}
 
   The background analysis used to find the policies are in \url{https://github.com/kylematoba/deeplearning-project/tree/master/code}.
-
-% 	\begin{itemize}
-% 	\item \url{https://github.com/kylematoba/deeplearning-project}
-% 	\item \url{https://github.com/kylematoba/models}
-% 	%\item %\url{https://colab.research.google.com/drive/1qV3vCsjnEcm5a8nRpN40n4qgVKKBzBkd#scrollTo=uiht7wpPPPCP} (also checked into the \texttt{deeplearning-project} repo above)
-% 	%\item \url{https://colab.research.google.com/drive/13GpO9tSqLxflZ9Z2B6RkWMVzfcemW2v7}
-% 	\end{itemize}
 
 \nocite{Torralba2008}
 {\small
