@@ -64,13 +64,13 @@ Kyle Matoba\\
 
 \section{Related works}
 
-  Data augmentation is indispensable in achieving state of the art performance in image classification. We have seen the best performance achieved by the best architecture wedded to the best data augmentation policy. One compelling finding to this effect comes from a paper that explores the possibility that models are overfitting CIFAR-10 data\cite{Recht2018} by testing against a newly collected CIFAR-10 test set, ``CIFAR-10.1''. Out of more than 20 models they entertained, the best-performing model on the CIFAR-10 dataset (\cite{Krizhevsky2009}) was a cutout (\cite{Devries2017}) regularised ``shake-shake'' architecture (\cite{Gastaldi2017}). Cutout is a data augmentation method which appends to the base data set additional occluded images that have had had contiguous regions set to ``zero'' (assuming the data has been normalised around this value).
+  Data augmentation is indispensable in achieving state of the art performance in image classification. We have seen the best performance achieved by the best architecture wedded to the best data augmentation policy. One compelling finding to this effect comes from a paper that explores the possibility that models are overfitting CIFAR-10 data \cite{Recht2018} by testing against a newly collected test set assembled according to the original methodology, ``CIFAR-10.1''. Out of more than 20 models they entertained, the best-performing model on the CIFAR-10 dataset (\cite{Krizhevsky2009}) was a cutout (\cite{Devries2017}) regularised ``shake-shake'' architecture (\cite{Gastaldi2017}). Cutout is a data augmentation method which appends to the base data set additional occluded images that have had had contiguous regions set to ``zero'' (assuming the data has been normalised around this value).
 
-  Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset \cite{Recht2018} with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (test) and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets.
+  Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset \cite{Recht2018} with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (aka ``test'') and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets.
 
 \section{The significant challenges in achieving the state of the art}
 
-  \cite{Cubuk2018} presents a fairly dramatic improvement to the state of the art on several standard benchmarks in image classification by fitting a very computationally demanding model many times to assess the criterion in a discrete optimisation problem. That is to say that this paper demands fairly considerable computation, and the authors, affiliated with Google Brain, clearly have it.
+  \cite{Cubuk2018} presents a fairly dramatic improvement to the state of the art on several standard benchmarks in image classification (though even since we originally wrote this sentence in October 2018 there are newer papers purporting new states of the art, e.g. \cite{Ho2018}) by fitting a very computationally demanding model many times to assess the criterion in a discrete optimisation problem. That is to say that this paper demands fairly considerable computation, and the authors, affiliated with Google Brain, clearly have it.
 
   Using the author's source code, we were able to duplicate their results on CIFAR-10 with several of the smaller architectures, such as a 26 layer ``Shake-Shake'' model of dimension 32 (\cite{Gastaldi2017}) and a Wide Residual Network (\cite{Zagoruyko2016}) with depth 28 and widening factor 10.
 
@@ -79,10 +79,10 @@ Kyle Matoba\\
   \subsection{Hardware Accelerators: GPUs and TPUs}
     Getting the computation time down another order of magnitude would be ideal, as it would mean that quick experiments could be done inside of an hour, and the full run, delivering cutting edge results, could be done overnight.
 
-    This was in fact possible using TPUs, though unfortunately it was not possible to adapt the \cite{Cubuk2018} author's code to use TPUs, as it was written in an archaic flavour of Tensorflow, \cite{Abadi2016}. In fact, there is an overwhelming consensus online that using TPUs directly from Tensorflow is hazardous, and that using Keras' (\cite{Chollet2015}) \texttt{tf.contrib.tpu.keras\_to\_tpu\_model} method was the only mostly-certain way to avoid doing something very dumb. Happily, after much searching, we were able to find a cleanly-coded and correct implementation of the Wide ResNet in Keras. Happily as well, once we had a cleanly-running Keras model, it was straightforward to convert to running on a TPU.
+    This was in fact possible using Tensor Processing Units (TPUs), though unfortunately it was not possible to adapt the \cite{Cubuk2018} author's code to use TPUs, as it was written in an archaic flavour of Tensorflow, \cite{Abadi2016}. In fact, there is an overwhelming consensus online that using TPUs directly from Tensorflow is hazardous, and that using Keras' (\cite{Chollet2015}) \texttt{tf.contrib.tpu.keras\_to\_tpu\_model} method was the only mostly-certain way to avoid doing something very dumb. Happily, after much searching, we were able to find a cleanly-coded and correct implementation of the Wide ResNet in Keras. Happily as well, once we had a cleanly-running Keras model, it was straightforward to convert to running on a TPU.
 
   \subsection{A significant aside: The model and success}
-    We elected to fit a relatively simpler and faster architecture, the Wide Residual Network (WRN or Wide ResNet, \cite{Zagoruyko2016}) -- our experiments showed that this model fit between 10 and 100 times more quickly than the best-performing models, so even on a TPU following best practice and under totally ideal conditions, it would not have been possible to do a fit of these models more than once or twice before the deadline. The author of \cite{Gastaldi2017} further bemoans the considerable computational challenges he faced in achieving his results as an individual without substantial computational resources.
+    We elected to fit a relatively simpler and faster architecture, the Wide Residual Network (WRN or Wide ResNet, \cite{Zagoruyko2016}) -- our experiments showed that this model fit between 10 and 100 times more quickly and with more mangeable memory requirements than the best-performing models, such as \cite{Yamada2018}, so even on a TPU following best practice and under totally ideal conditions, it would not have been possible to do a fit of these models more than once or twice before the deadline. As a further indication of the challenges in this area, \cite{Gastaldi2017} also bemoans the considerable computational challenges he faced in achieving his results as an individual without substantial hardware resources.
 
     Since empirically, the only thing faster than a TPU would be a cluster of TPUs or a massive cluster of GPUs (we did not try the only other credible hardware-level acceleration we are aware of: 16 bit floats on chips having specialised support for them. Mostly this was because we found out about them only recently, but they seem to not be available via Google Cloud Services, and appear to require a good amount of tuning to get correct in any event), we can be confident that it would not have been possible to fit this model short of thousands of dollars of google cloud compute credit, or else some \emph{very} cutting-edge optimisations. In our researsh, most of the serious optimsations are coded in Pytorch (precluding the use of TPUs), and use (wide) resnets anyway. For one very cool flavour of this, see the ranking at \url{https://dawn.cs.stanford.edu/benchmark/#cifar10}) of the \cite{Coleman2017} DAWNBench project.
 
@@ -227,7 +227,7 @@ Kyle Matoba\\
     	\begin{center}
     		\includegraphics[width=0.5\textwidth]{splitPolicy.png}
     	\end{center}
-    	\caption{During training, an image will have one of the possible transforms applied to it with a random magnitude. A bird image will have a 37\% chance of being flipped left-right, but only a 6\% chance of being rotated.}
+    	\caption{During training, an image will have one of the possible transforms applied to it with a random magnitude. For example, a bird image will have a 37\% chance of being flipped left-right, but only a 6\% chance of being rotated.}
     	\label{fig:splitPolicy}
     \end{figure}
     
@@ -239,7 +239,7 @@ Kyle Matoba\\
     	\begin{center}
     		\includegraphics[width=0.5\textwidth]{classlessPolicy.png}
     	\end{center}
-    	\caption{...}
+    	\caption{Overall likeliood of transform}
     	\label{fig:classlessPolicy}
     \end{figure}
     
@@ -249,7 +249,7 @@ Kyle Matoba\\
     	\begin{center}
     		\includegraphics[width=0.5\textwidth]{ValAccuracies.png}
     	\end{center}
-    	\caption{...}
+    	\caption{Performance of image-classification models trained with (1) the same augmentation applied to all classes, (2) non-class specific augmentations, and (3) no augmentation.}
     	\label{fig:ValAccuracies}
     \end{figure}
     

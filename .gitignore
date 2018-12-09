@@ -12,7 +12,7 @@
 *.nav
 *.snm
 *.toc
-
+*.synctex.gz
 
 *.pyc
 *.pyx
