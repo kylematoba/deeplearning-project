@@ -211,31 +211,62 @@ Kyle Matoba\\
 
   \subsection{Class Based Policies}
 
-    In the original AutoAugment paper, each policy of data augmentation requires selecting 10 operations, each with one of 16 transformations, 11 discrete probabilities of application, and 10 magnitudes. The resulting action space has approximately $2.9 \times 10^{31}$ possible actions, making a policy-gradient reinforcement learning approach preferable. One challenge in vanilla policy gradient methods is finding a way to update weights without moving too far from the current policy. Several surrogate loss functions have been designed to encourage or enforce smaller steps, including Trust Region Policy Optimization (TRPO) and now Proximal Policy Optimization (PPO). AutoAugment uses a variant called PPO-Clip, developed by OpenAI \cite{Schulman2017}. PPO-Clip implements a surrogate loss function that includes a clipped term for how much more or less likely the sampled action trajectory would be under the new policy.We developed our own controller model which uses PPO-Clip to search through possible augmentation policy space, but with some reductions and additions:
+    In the original AutoAugment paper, each policy of data augmentation requires selecting 10 operations, each with one of 16 transformations, 11 discrete probabilities of application, and 10 magnitudes. The resulting action space has approximately $2.9 \times 10^{31}$ possible actions, making a policy-gradient reinforcement learning approach preferable. One challenge in vanilla policy gradient methods is finding a way to update weights without moving too far from the current policy. Several surrogate loss functions have been designed to encourage or enforce smaller steps, including Trust Region Policy Optimization (TRPO) and now Proximal Policy Optimization (PPO). AutoAugment uses a variant called PPO-Clip, developed by OpenAI \cite{Schulman2017}. PPO-Clip implements a surrogate loss function that includes a clipped term for how much more or less likely the sampled action trajectory would be under the new policy.
 
+    In order to test whether a reinforcement learner could find a data augmentation policy that took image class into account, we designed our own controller model which uses PPO-Clip. In order to make the repeated training iterations feasible, we continued to use a reduced training set and limited each subpolicy to a single transform with a random magnitude, as described in section 5.2.
+
+    The controller model contains a fully-connected layer followed by a set of 10 parallel dense layers, each with 21 nodes and softmax activation (one layer per image class, one node for each transform). The output of each softmax layers represents probabilities in a multinomial distribution across the possible transforms.
+
+    In order to generate discretized policies, the controller samples 100 times from each multinomial distribution. After normalization, the result is a matrix with 10 rows and 21 columns in which each value indicates how often to use a particular transform for each image class during data augmentation.
+
+    Each fitting iteration, the controller model sampled 5 policies from its current weights and used them to augment data for partially-trained image classification "child" models. The per-class validation recall scores from each child model acted as the reward signal to fit the controller. After a relatively short training of 5 iterations, the controller's final softmax outputs became our policy \ref{fig:splitPolicy}.
+    
+    If the controller model learned to produce higher-quality policies, it should have a higher probability of generating the policies which did better. To verify the model's improvement, we plotted each policy's mean recall score against the controller's log likelihood of generating the policy, and found a correlation of 0.378, indicating a modest improvement in producing quality policies.
+    
+    \begin{figure}[h]
+    	\begin{center}
+    		\includegraphics[width=0.5\textwidth]{splitPolicy.png}
+    	\end{center}
+    	\caption{During training, an image will have one of the possible transforms applied to it with a random magnitude. A bird image will have a 37\% chance of being flipped left-right, but only a 6\% chance of being rotated.}
+    	\label{fig:splitPolicy}
+    \end{figure}
+    
+    Even with only a few iterations of training, a few trends emerged: the controller had learned not to recommend using the Invert or Flip\_UD in almost any cases, which was expected given how poorly they did in our naive analysis. Surprisingly, policies with high probabilities of applying TranslateX did poorly and were also anti-recommended across the board.  Transforms like AutoContrast and Crop were heavily applied to some classes but not others, indicating that the classes might have different symmetries.
+    
+    To examine the effect of separating by class, we trained a separate controller model which treated all images the same. After the same number of training iterations, its final output produced a classless policy. Like the split-class policy, it avoided Invert, Flip\_UD, and TranslateX while frequently implementing AutoContrast, Crop, and Flip\_LR.
+    
+    \begin{figure}[h]
+    	\begin{center}
+    		\includegraphics[width=0.5\textwidth]{classlessPolicy.png}
+    	\end{center}
+    	\caption{...}
+    	\label{fig:classlessPolicy}
+    \end{figure}
+    
+    To compare their performance, we used each of these augmentation policies while training a model on 25,000 images from the CIFAR10 training set. After 300 epochs, the model trained with a classless policy outperformed the model trained with a split-class policy, with a test accuracy of 79.1\% to 77.9\%. Both models did better than a model trained without any data augmentation, which had an accuracy of 75.1\%.  (When taking into account prior knowledge of equally-distributed image classes, the accuracies rose to 79.5\%, 78.1\%, and 75.2\%)
+    
+    \begin{figure}[h]
+    	\begin{center}
+    		\includegraphics[width=0.5\textwidth]{ValAccuracies.png}
+    	\end{center}
+    	\caption{...}
+    	\label{fig:ValAccuracies}
+    \end{figure}
+    
+    There are several possible reasons the classless policy performed better in this trial:
+    
     \begin{itemize}
       \item 
-        Each subpolicy is limited to a single transform with a random magnitude
+        Limited controller training time: The controller models only sampled 25 policies due to time and processing constraints. When exploring a larger search space (as the split-class controller was doing) it might take longer to find a promising policy.
       \item 
-        The space of image transforms is reduced to those identified as promising in \autoref{sec:policies}.
+        Limited child model training time: in order to sample the effect of many different policies, the process of training a child model had to be quick. Training the child models longer would reduce the variability and get a higher-quality reward signal for the controller.
       \item 
-        Each image has different probabilities of using each of subpolicy when it is used in training, based on which imge class it is.Each policy output is a matrix in which each row corresponds to an image class and each column corresponds to a different transform.
+        Simplicity of controller model architecture: The controller model used a single dense layer before outputting its parallel dense softmax values. A more complex architecture (with more data to train on) might be able to learn more ineractions between the classes and transforms.
+      \item 
+        Errors in implementing the controller model: Despite using the PPO-Clip algorithm, the controller models were prone to over-adjust their weights from a limited sample. Implementing the algorithm in TensorFlow from scratch left many places to introduce bugs.
     \end{itemize}
 
-
-    \begin{figure}[h]
-    \begin{center}
-    \includegraphics[width=0.5\textwidth]{heatmap2.png}
-    \end{center}
-    \caption{Example policy for augmenting each image class differently, indicating the percent chance of selecting each transform for each class}
-    \label{fig:heatmap2}
-    \end{figure}
-
-    Each row - representing an image class - contains discrete values across the possible image transforms that were sampled from one of 10 parallel softmax layers, treating the probabilities as a multinomial distribution.
-		
-    The example policy (\autoref{fig:heatmap2}) indicates that when being used in training, a bird image will have a 40\% chance of being solarized, but only a 10\% chance of being flipped left-right.
-		
-    Since data augmentation which treats different image classes differently is relatively uncommon, the built-in functionality for the top models which user TPUs were unable to incorporate it. We are in the process of finding a way to apply our custom augmentation, with the backup of using less powerful models which will be slower to train.
+    It would be interesting to see how well the controller models could find a split-class policy with more time and processing power for training, but when resources are limited it appears not to be the best approach.
 
   \subsection{Observations}
 	
