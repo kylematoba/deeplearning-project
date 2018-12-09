@@ -36,7 +36,8 @@
 
 \usepackage{graphicx}  % Required for including images
 \usepackage{booktabs} % Top and bottom rules for tables
-
+\usepackage{natbib} 
+ 
 \title{COMS W4995 Final Report: Automatic Data Augmentation Policy Selection} % Poster title
 \author{Jonathan D. Armstrong, Jesse Galef, and Kyle Matoba} % Author(s)
 \institute{Computer Science Department, Columbia University} % Institution(s)
@@ -55,51 +56,51 @@
 \begin{column}{\onecolwid} % The first column
 
 \begin{alertblock}{Objectives}
-Approach or improve upon state of the arts results in image classification on the CIFAR-10 dataset (\cite{Krizhevsky2009}) through better, automatically chosen, data augmentation methods. Building upon \cite{Cubuk2018}, but with an emphasis on practical accessability to those without supercomputing resources.
+  	
+	
+  Approach or improve upon state of the arts results in image classification on the CIFAR-10 dataset (\cite{Krizhevsky2009}) by learning data augmentation policies from data. Build on the work of AutoAugment\cite{Cubuk2018}, but with an emphasis on practical accessibility to those without supercomputing resources.
 \end{alertblock}
 
 % INTRODUCTION
 
 \begin{block}{Introduction}
 
-%	Data augmentation is indispensable in achieving state of the art performance in image classification. We have seen the best performance achieved by the best architecture wedded to the best data augmentation policy.  One compelling finding to this effect is that \cite{Recht2018} find that out of more than 20 models they entertained, the best-performing model on the CIFAR-10 dataset (\cite{Krizhevsk2009}) was a cutout (\cite{Devries2017}) regularised ``shake-shake'' architecture (\cite{Gastaldi2017}). Cutout is a data augmentation method which appends to the base data set additional occluded images that have had had contiguous regions set to ``zero'' (assuming the data has been normalised around this value). 
-% 
-% 	Not only was the cutout regularized model best in test-set accuracy, but it was also best on the newly-collected ``CIFAR10.1'' dataset with the smallest drop in accuracy. The other well-performing cutout-regularised model, a wide resnet (\cite{Zagoruyko2016}), whilst beaten by some un-augmented models (though the shake-shake model itself has a straightforward interpretation as data augmentation applied to an representation), both in (test) and out of sample, sees a smaller dropoff between CIFAR 10 test and CIFAR10.1 data sets.
+	\begin{equation}
+		\text{SOTA Accuracy} = \text{SOTA Data Augmentaiton } + \text{ SOTA Model}
+	\end{equation}
 
-Data augmentation, which fits a model on functions of the data meant to resemble (to a human) the same label, but have different inputs, is indispensable for obtaining state of the art performance on image classification. For example, not only does \cite{Recht2018} find that data augmentated models perform considerably much better than un-augmented models, but all of the best-performing models on the CIFAR 10 dataset include data augmentation. Furthermore, the automented models perform better on truly ``out of sample'' models, and have lower drops in accuracy between in-sample and out-of-sample accuracy.
+  The AutoAugment authors have proven that state of the art results (SOTA) can be achieved simply by using a good data augmentation policy on an already proven SOTA model. Their innovation is the use of reinforcement learning to generate this policy from the data itself. The data augmentation policies considered consist of image transforms applied homogeneously to every image category. Recognizing that each image category can have different invariants, we explored finer-grained policy architectures that support targeting transforms to each individual image category.
 
-\autoref{fig:cutout_ship} shows an example of an augmented image in the CIFAR-10 dataset: a random box of pixels have been set to black (called ``cutout'', \cite{Devries2017}), it has been randomly rotated, and again had cutout applied. It is still recognisable as a ship, though its $[0, 1]^{32 \times 32 \times 3}$ representation is quite different in most measures.
+  %Data augmentation is indispensable for obtaining state of the art performance on image classification. For example, not only does \cite{Recht2018} find that data augmented models perform considerably much better than un-augmented models, but all of the best-performing models on the CIFAR 10 dataset include data augmentation. Furthermore, the augmented models perform better on ``CIFAR 10.1'', a recently collected secondary test set\cite{Recht2018}. , and have lower drops in accuracy between in-sample and out-of-sample accuracy.
 
-\begin{figure}
-\centering
-\includegraphics[width=0.70\textwidth]{ship.png}
-\caption{An augmented CIFAR 10 picture labelled as a ship}
-\label{fig:cutout_ship}
-\end{figure}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.70\textwidth]{ship.png}
+    \caption{
+    	An example of an augmented image in the CIFAR-10 dataset: a random box of pixels have been set to black (called ``cutout'', \cite{Devries2017}), it has been randomly rotated, and again had cutout applied. It is still recognizable as a ship, though its raw representation is completely different.}
+    \label{fig:cutout_ship}
+  \end{figure}
 \end{block}
 
-\begin{block}{Wide ResNet}
-\cite{Zagoruyko2016}
+%\begin{block}{Wide ResNet}
+%  \cite{Zagoruyko2016}
 
-\end{block}
+%\end{block}
 
 \begin{block}{Hardware Accelerators}
-Our results were computed on Google Colaboratory with a Tensor Processing Unit backend.
-If you have an already compiled \texttt{tf.keras} model called \texttt{m} then you can convert it to a \texttt{KerasTPUModel} simply:
+  Our results were computed on Google Colaboratory with a Tensor Processing Unit backend.
+  If you have an already compiled \texttt{tf.keras} model called \texttt{m} then you can convert it to a \texttt{KerasTPUModel} simply:
 
-{\small
-\texttt{w = 'grpc://' + os.environ['COLAB\_TPU\_ADDR']} \\
-\texttt{r = tf.contrib.cluster\_resolver.TPUClusterResolver(w)} \\
-\texttt{s = tf.contrib.tpu.TPUDistributionStrategy(r, False)} \\
-\texttt{m = tf.contrib.tpu.keras\_to\_tpu\_model(m, strategy=s)}
-}
+  {\small
+    \texttt{w = 'grpc://' + os.environ['COLAB\_TPU\_ADDR']} \\
+    \texttt{r = tf.contrib.cluster\_resolver.TPUClusterResolver(w)} \\
+    \texttt{s = tf.contrib.tpu.TPUDistributionStrategy(r, False)} \\
+    \texttt{m = tf.contrib.tpu.keras\_to\_tpu\_model(m, strategy=s)}
+  }
 
-We saw a roughly 15 times speed up over a K80 GPU (albeit after a few minutes of compilation) on this task. 
+  We saw a roughly 15 times speed up over a K80 GPU (albeit after a few minutes of compilation) on this task. 
 
-\begin{equation}
-E = mc^{2}
-\label{eqn:Einstein}
-\end{equation}
+
 \end{block}
 
 \end{column} % End of the first column
@@ -108,41 +109,74 @@ E = mc^{2}
 % \begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
 % \end{column} % End of column 2.2
 
-\begin{block}{Results}
-\begin{table}
-\vspace{2ex}
-\begin{tabular}{l l l}
-\toprule
-\textbf{Treatments} & \textbf{Response 1} & \textbf{Response 2}\\
-\midrule
-Treatment 1 & 0.0003262 & 0.562 \\
-Treatment 2 & 0.0015681 & 0.910 \\
-Treatment 3 & 0.0009271 & 0.296 \\
-\bottomrule
-\end{tabular}
-\caption{Table caption}
-\end{table}
-\end{block}
+\begin{block}{Na\"{\i}ve Analysis}
 
-\begin{block}{Fundamental bound on achievable accuracy?}
+ We leveraged the concept of composition to create a simple policy. Using a basic model and $1/10$ of the training data, we established a baseline performance then evaluated how test accuracy changed for each image category when a single transform was applied. Using these results, our best performing policy ironically ignored image category information. 
 
-{\small
-\texttt{import keras} \\
-\texttt{import matplotlib.pyplot as plt} \\
+ \begin{figure}
+ 	\centering
+ 	\includegraphics[width=0.70\textwidth]{naive_analysis.png}
+ 	\caption{
+ 		The best policy combined the transforms that improved performance by at least one percent then randomly selected one of these policies to apply to the images for each step of stochastic gradient descent. When combining the best individual transforms, we acheive test accuracy greater than any individual transform was able to acheive.} 
+ 	\label{fig:niave_analysis}
+  \end{figure}
 
-\texttt{labels = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']} \\
-\texttt{\_, (x, y) = keras.datasets.cifar10.load\_data()} \\
-\texttt{plt.imshow(x[2405, :, :, :])} \\
-\texttt{plt.title(labels[y[2405, 0]])}
-}
+  After identifying our best na\"{\i}ve analysis policy, we evaluated its performance against AutoAugment on the state of the art Wide ResNet model \cite{Zagoruyko2016}.
 
-\begin{figure}
-\centering
-\includegraphics[width=0.70\linewidth]{catfrog.png}
-\end{figure}
+  \begin{table}[h]
+	\begin{tabular}{l|c|c}
+		\hline
+		Policy  &CIFAR-10 Test  &CIFAR-10.1 Test  \\
+		&Accuracy (\%)  &Accuracy (\%) \\ \hline
+		Cutout + Flipping                 & 96.10 & 91.80 \\
+		AutoAugment			        & 96.98 & 92.30 \\
+		Na\"{\i}ve Analysis 			&96.80	&92.40 \\
+	\end{tabular}
+	\caption{WRN model \cite{Zagoruyko2016} test accuracies for CIFAR-10 and CIFAR-10.1}
+  \end{table}
 
+  \textbf{Notice that we are able to approach the performance of AutoAugment (which uses a sophisticated reinforcement learning scheme) with a simple and easy to understand approach.}
+
+  Using what we learned from this na\"{\i}ve analysis approach, can we do better?  
 
 \end{block}
+
+
+
+\begin{block}{Reinforcement Learning: Image Class Targeted Policies}
+
+  We coded our own implementation of the AutoAugment procedure that supports policies with transforms at image class level. 
+
+  \begin{figure}
+	\centering
+	\includegraphics[width=0.70\textwidth]{splitPolicy.png}
+	\caption{
+		Notice how transform probabilities are far from homogeneous for each image category.}
+	\label{fig:cutout_ship}
+  \end{figure}
+
+\end{block}
+
+
+%\begin{block}{Fundamental bound on achievable accuracy?}
+
+%{\small
+%\texttt{import keras} \\
+%\texttt{import matplotlib.pyplot as plt} \\
+
+%\texttt{labels = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']} \\
+%\texttt{\_, (x, y) = keras.datasets.cifar10.load\_data()} \\
+%\texttt{plt.imshow(x[2405, :, :, :])} \\
+%\texttt{plt.title(labels[y[2405, 0]])}
+%}
+
+%  \begin{figure}
+%  \centering
+%  \includegraphics[width=0.70\linewidth]{catfrog.png}
+%  \end{figure}
+
+
+%\end{block}
 
 
 % IMPORTANT RESULT
@@ -155,14 +189,28 @@ Treatment 3 & 0.0009271 & 0.296 \\
 \begin{column}{\onecolwid} % The third column
 
 \begin{block}{Conclusion}
-We have demonstrated that very simple policy searches suffice for obtaining nearly optimal performance-enhancing image augmentation. Together with a relatively lightweight Wide ResNet fit upon a free TPU, we are able to present an at-or-near state of the art CIFAR-10 image classifier that can be fit quickly and cheaply, an increasingly important criterion (\cite{Coleman2017}).
+		
+  We have demonstrated that very simple policy searches suffice for obtaining nearly optimal performance-enhancing image augmentation. Together with a relatively lightweight Wide ResNet fit upon a free TPU, we are able to present an at-or-near state of the art CIFAR-10 image classifier that can be fit quickly and cheaply, an increasingly important criterion (\cite{Coleman2017}).
+  
+  We had insufficient time to fully realize final results from our custom AutoAugment algorithm, but our initial results demonstrate that considering policy architectures at the image class level has potential. 
+  
+  
 \end{block}
 
 \begin{block}{References}
-{\small
-\bibliographystyle{ieee}
-\bibliography{../biblio}
-}
+%\begin{spacing}{0.75}
+	
+	% \printbibliography
+	\bibliographystyle{plainnat}  % needs package natbib
+	
+	\bibliography{../biblio}   
+	
+%\end{spacing}	
+	
+%{\small
+%\bibliographystyle{ieee}
+%\bibliography{../biblio}
+%}
 \end{block}
 
 % ACKNOWLEDGEMENTS
